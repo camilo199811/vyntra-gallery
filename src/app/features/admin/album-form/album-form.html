@@ -1,0 +1,418 @@
+
+<section class="mx-auto max-w-5xl pb-12">
+
+  <!-- ENCABEZADO -->
+  <header class="mb-8">
+
+    <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-purple-700">
+      VYNTRA / GALLERY ADMIN
+    </p>
+
+    <h1 class="text-3xl font-semibold text-gray-900">
+      Crear nuevo álbum
+    </h1>
+
+    <p class="mt-2 text-sm text-gray-500">
+      Configura una experiencia fotográfica privada
+      y personalizada para tu cliente.
+    </p>
+
+  </header>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="saveAlbum()"
+    class="space-y-6">
+
+    <!-- 1. INFORMACIÓN DEL EVENTO -->
+    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-8">
+
+      <div class="mb-6">
+        <h2 class="text-lg font-semibold text-gray-900">
+          Información del evento
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-500">
+          Identifica el álbum y asígnalo a un cliente.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+        <!-- CLIENTE -->
+        <div class="md:col-span-2">
+
+          <label for="clientId" class="mb-2 block text-sm font-medium">
+            Cliente asociado *
+          </label>
+
+          <select
+            id="clientId"
+            formControlName="clientId"
+            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3"
+            [disabled]="loadingClients()">
+
+            <option value="">
+              Selecciona un cliente
+            </option>
+
+            @for (client of clients(); track client.id) {
+              <option [value]="client.id">
+                {{ client.full_name }}
+              </option>
+            }
+
+          </select>
+
+          @if (loadingClients()) {
+            <p class="mt-2 text-xs text-gray-500">
+              Cargando clientes...
+            </p>
+          }
+
+          @if (clientsError()) {
+            <p class="mt-2 text-xs text-red-600">
+              {{ clientsError() }}
+            </p>
+          }
+
+          @if (!loadingClients() && !clientsError() && clients().length === 0) {
+            <p class="mt-2 text-xs text-amber-700">
+              No hay clientes de evento disponibles.
+              Registra primero un cliente.
+            </p>
+          }
+
+          @if (form.controls.clientId.touched &&
+               form.controls.clientId.invalid) {
+            <p class="mt-1 text-xs text-red-600">
+              Selecciona el cliente propietario del álbum.
+            </p>
+          }
+
+        </div>
+
+        <!-- TÍTULO -->
+        <div class="md:col-span-2">
+
+          <label for="title" class="mb-2 block text-sm font-medium">
+            Nombre del álbum *
+          </label>
+
+          <input
+            id="title"
+            type="text"
+            maxlength="120"
+            formControlName="title"
+            placeholder="Ej. Nuestra boda — John & Zulma"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-purple-500"
+          />
+
+          @if (form.controls.title.touched &&
+               form.controls.title.invalid) {
+            <p class="mt-1 text-xs text-red-600">
+              Ingresa un nombre de máximo 120 caracteres.
+            </p>
+          }
+
+        </div>
+
+        <!-- TIPO DE EVENTO -->
+        <div>
+
+          <label for="eventType" class="mb-2 block text-sm font-medium">
+            Tipo de evento *
+          </label>
+
+          <select
+            id="eventType"
+            formControlName="eventType"
+            class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3">
+
+            @for (event of eventTypes; track event.value) {
+              <option [value]="event.value">
+                {{ event.label }}
+              </option>
+            }
+
+          </select>
+
+        </div>
+
+        <!-- FECHA -->
+        <div>
+
+          <label for="eventDate" class="mb-2 block text-sm font-medium">
+            Fecha del evento
+          </label>
+
+          <input
+            id="eventDate"
+            type="date"
+            formControlName="eventDate"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3"
+          />
+
+        </div>
+
+        <!-- DESCRIPCIÓN -->
+        <div class="md:col-span-2">
+
+          <label for="description" class="mb-2 block text-sm font-medium">
+            Descripción del álbum
+          </label>
+
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="3"
+            placeholder="Describe brevemente este evento..."
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-purple-500"></textarea>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- 2. PAQUETE FOTOGRÁFICO -->
+    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-8">
+
+      <h2 class="text-lg font-semibold text-gray-900">
+        Paquete fotográfico
+      </h2>
+
+      <p class="mb-6 mt-1 text-sm text-gray-500">
+        Define el límite de selección y el costo de las fotografías adicionales.
+      </p>
+
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+        <div>
+
+          <label for="includedPhotos" class="mb-2 block text-sm font-medium">
+            Fotografías incluidas *
+          </label>
+
+          <input
+            id="includedPhotos"
+            type="number"
+            min="1"
+            step="1"
+            formControlName="includedPhotos"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3"
+          />
+
+          @if (form.controls.includedPhotos.touched &&
+               form.controls.includedPhotos.invalid) {
+            <p class="mt-1 text-xs text-red-600">
+              Ingresa una cantidad válida mayor que cero.
+            </p>
+          }
+
+        </div>
+
+        <div>
+
+          <label for="extraPhotoPrice" class="mb-2 block text-sm font-medium">
+            Precio por fotografía adicional (COP) *
+          </label>
+
+          <input
+            id="extraPhotoPrice"
+            type="number"
+            min="0"
+            step="1"
+            formControlName="extraPhotoPrice"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3"
+          />
+
+          @if (form.controls.extraPhotoPrice.touched &&
+               form.controls.extraPhotoPrice.invalid) {
+            <p class="mt-1 text-xs text-red-600">
+              Ingresa un precio válido.
+            </p>
+          }
+
+        </div>
+
+      </div>
+
+      <div class="mt-6 rounded-xl bg-purple-50 p-4">
+
+        <p class="text-sm font-medium text-purple-900">
+          Configuración de selección
+        </p>
+
+        <p class="mt-1 text-sm text-purple-800">
+          El cliente podrá seleccionar
+          {{ form.controls.includedPhotos.value }}
+          fotografías incluidas en su paquete.
+        </p>
+
+        <p class="mt-2 text-sm text-purple-800">
+          Cada fotografía adicional tendrá un costo de
+          {{ form.controls.extraPhotoPrice.value }}
+          COP.
+        </p>
+
+      </div>
+
+      <label class="mt-6 flex cursor-pointer items-start gap-3">
+
+        <input
+          type="checkbox"
+          formControlName="allowExtraPhotos"
+          class="mt-1 h-4 w-4 accent-purple-700"
+        />
+
+        <span>
+          <strong class="block text-sm text-gray-900">
+            Permitir fotografías adicionales
+          </strong>
+
+          <span class="mt-1 block text-xs text-gray-500">
+            El cliente podrá solicitar fotografías
+            adicionales al paquete contratado.
+          </span>
+        </span>
+
+      </label>
+
+    </section>
+
+    <!-- 3. PRIVACIDAD Y PROTECCIÓN -->
+    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-8">
+
+      <h2 class="text-lg font-semibold text-gray-900">
+        Privacidad y protección
+      </h2>
+
+      <p class="mb-6 mt-1 text-sm text-gray-500">
+        Configura cómo podrá visualizar y descargar
+        las fotografías el cliente.
+      </p>
+
+      <div class="space-y-6">
+
+        <label class="flex cursor-pointer items-start gap-3">
+
+          <input
+            type="checkbox"
+            formControlName="watermarkEnabled"
+            class="mt-1 h-4 w-4 accent-purple-700"
+          />
+
+          <span>
+            <strong class="block text-sm text-gray-900">
+              Marca de agua Vyntra
+            </strong>
+
+            <span class="mt-1 block text-xs text-gray-500">
+              Indica que las previsualizaciones deben
+              mostrar la marca de agua de Vyntra.
+              Los archivos originales se conservarán
+              sin modificaciones.
+            </span>
+          </span>
+
+        </label>
+
+        <div class="border-t border-gray-100"></div>
+
+        <label class="flex cursor-pointer items-start gap-3">
+
+          <input
+            type="checkbox"
+            formControlName="allowDownloads"
+            class="mt-1 h-4 w-4 accent-purple-700"
+          />
+
+          <span>
+            <strong class="block text-sm text-gray-900">
+              Permitir descargas
+            </strong>
+
+            <span class="mt-1 block text-xs text-gray-500">
+              Autoriza las descargas según los permisos
+              que se implementen en el portal privado.
+            </span>
+          </span>
+
+        </label>
+
+      </div>
+
+    </section>
+
+    <!-- 4. ESTADO DEL ÁLBUM -->
+    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-8">
+
+      <h2 class="mb-2 text-lg font-semibold text-gray-900">
+        Estado del álbum
+      </h2>
+
+      <p class="mb-5 text-sm text-gray-500">
+        Recomendamos comenzar como borrador
+        mientras se preparan las fotografías.
+      </p>
+
+      <label for="status" class="mb-2 block text-sm font-medium">
+        Estado inicial
+      </label>
+
+      <select
+        id="status"
+        formControlName="status"
+        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3">
+
+        <option value="draft">
+          Borrador
+        </option>
+
+        <option value="published">
+          Publicado
+        </option>
+
+      </select>
+
+    </section>
+
+    <!-- ERROR DE GUARDADO -->
+    @if (errorMessage()) {
+      <div
+        role="alert"
+        class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+
+        {{ errorMessage() }}
+
+      </div>
+    }
+
+    <!-- ACCIONES -->
+    <div class="flex flex-col justify-end gap-3 sm:flex-row">
+
+      <button
+        type="button"
+        (click)="cancel()"
+        [disabled]="saving()"
+        class="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-medium text-gray-700">
+
+        Cancelar
+
+      </button>
+
+      <button
+        type="submit"
+        [disabled]="saving() || loadingClients() || !!clientsError()"
+        class="rounded-xl bg-purple-800 px-8 py-3 text-sm font-medium text-white hover:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-50">
+
+        {{ saving() ? 'Guardando álbum...' : 'Guardar álbum' }}
+
+      </button>
+
+    </div>
+
+  </form>
+
+</section>

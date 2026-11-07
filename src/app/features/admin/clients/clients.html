@@ -1,0 +1,198 @@
+<section class="clients-page">
+
+    <header class="page-header">
+        <div>
+            <span class="eyebrow">VYNTRA / ADMINISTRACIÓN</span>
+            <h1>Clientes</h1>
+            <p>
+                Administra los clientes de eventos y marcas
+                desde un solo lugar.
+            </p>
+        </div>
+
+        <div class="header-actions">
+            <span class="client-count">
+                {{ clients().length }} clientes registrados
+            </span>
+
+            <button type="button" class="create-button" (click)="openCreateForm()">
+                + Crear cliente
+            </button>
+        </div>
+    </header>
+    @if (successMessage()) {
+    <div class="success-alert" role="status">
+        {{ successMessage() }}
+    </div>
+    }
+
+    @if (showCreateForm()) {
+    <div class="form-backdrop">
+
+        <section class="create-client-panel" role="dialog" aria-modal="true" aria-labelledby="create-client-title">
+
+            <div class="form-heading">
+                <div>
+                    <span class="eyebrow">VYNTRA / CLIENTES</span>
+                    <h2 id="create-client-title">Nuevo cliente</h2>
+                    <p>Registra un nuevo cliente en la plataforma.</p>
+                </div>
+
+                <button type="button" class="close-button" [disabled]="saving()" (click)="closeCreateForm()"
+                    aria-label="Cerrar formulario">
+                    ×
+                </button>
+            </div>
+
+            <form [formGroup]="clientForm" (ngSubmit)="saveClient()">
+
+                <div class="form-field">
+                    <label for="client-name">Nombre completo *</label>
+                    <input id="client-name" formControlName="full_name" placeholder="Nombre del cliente" />
+
+                    @if (clientForm.controls.full_name.touched &&
+                    clientForm.controls.full_name.invalid) {
+                    <small>Ingresa al menos 3 caracteres.</small>
+                    }
+                </div>
+
+                <div class="form-field">
+                    <label for="client-email">Correo electrónico</label>
+                    <input id="client-email" type="email" formControlName="email" placeholder="correo@ejemplo.com" />
+
+                    @if (clientForm.controls.email.touched &&
+                    clientForm.controls.email.invalid) {
+                    <small>Ingresa un correo válido.</small>
+                    }
+                </div>
+
+                <div class="form-field">
+                    <label for="client-phone">
+                        Teléfono de contacto
+                    </label>
+
+                    <div class="phone-field">
+
+                        <select class="country-select" aria-label="País del teléfono" [value]="selectedCountry()"
+                            (change)="changeCountry($any($event.target).value)">
+
+                            @for (country of countries; track country.code) {
+                            <option [value]="country.code" [selected]="country.code === selectedCountry()">
+                                {{ country.name }} ({{ country.dialCode }})
+                            </option>
+                            }
+
+                        </select>
+
+                        <input id="client-phone" type="tel" inputmode="tel" autocomplete="tel-national"
+                            formControlName="phone" [placeholder]="phoneExample()" (blur)="validatePhone()" />
+
+                    </div>
+
+                    @if (phoneError()) {
+                    <small class="phone-error">
+                        {{ phoneError() }}
+                    </small>
+                    }
+                </div>
+
+                <div class="form-field">
+                    <label for="client-type">Tipo de cliente *</label>
+                    <select id="client-type" formControlName="client_type">
+                        <option value="event">Cliente de evento</option>
+                        <option value="brand">Cliente de marca</option>
+                    </select>
+                </div>
+
+                @if (errorMessage()) {
+                <div class="form-error" role="alert">
+                    {{ errorMessage() }}
+                </div>
+                }
+
+                <div class="form-actions">
+                    <button type="button" class="cancel-button" [disabled]="saving()" (click)="closeCreateForm()">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="save-button" [disabled]="saving()">
+                        {{ saving() ? 'Guardando...' : 'Guardar cliente' }}
+                    </button>
+                </div>
+
+            </form>
+
+        </section>
+    </div>
+    }
+    <div class="filter-bar">
+        <button type="button" [class.active]="selectedType() === 'all'" (click)="setFilter('all')">
+            Todos
+        </button>
+
+        <button type="button" [class.active]="selectedType() === 'event'" (click)="setFilter('event')">
+            Eventos
+        </button>
+
+        <button type="button" [class.active]="selectedType() === 'brand'" (click)="setFilter('brand')">
+            Marcas
+        </button>
+    </div>
+
+    @if (loading()) {
+    <div class="empty-state">
+        Cargando clientes...
+    </div>
+    } @else if (errorMessage()) {
+    <div class="empty-state error">
+        {{ errorMessage() }}
+        <button type="button" (click)="loadClients()">
+            Reintentar
+        </button>
+    </div>
+    } @else if (filteredClients.length === 0) {
+    <div class="empty-state">
+        <div class="empty-icon">◎</div>
+        <h2>No hay clientes registrados</h2>
+        <p>
+            Los clientes que registremos en Vyntra
+            aparecerán aquí.
+        </p>
+    </div>
+    } @else {
+    <div class="clients-grid">
+        @for (client of filteredClients; track client.id) {
+        <article class="client-card">
+
+            <div class="client-avatar">
+                {{ client.full_name.charAt(0).toUpperCase() }}
+            </div>
+
+            <div class="client-info">
+                <span class="type-label">
+                    {{ client.client_type === 'event'
+                    ? 'CLIENTE DE EVENTO'
+                    : 'CLIENTE DE MARCA' }}
+                </span>
+
+                <h3>{{ client.full_name }}</h3>
+
+                <p>{{ client.email || 'Sin correo registrado' }}</p>
+                <p>{{ client.phone || 'Sin teléfono registrado' }}</p>
+
+                <span class="access-status">
+                    {{ client.auth_user_id
+                    ? 'Cuenta vinculada'
+                    : 'Sin acceso asignado' }}
+                </span>
+                <a class="detail-button" [routerLink]="['/admin/clients', client.id]">
+                    Ver detalles →
+                </a>
+            </div>
+
+        </article>
+        }
+    </div>
+    }
+
+</section>

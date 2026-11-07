@@ -1,0 +1,171 @@
+
+<div
+  class="event-page"
+  [style.--event-bg]="theme().background"
+  [style.--event-surface]="theme().surface"
+  [style.--event-accent]="theme().accent"
+  [style.--event-text]="theme().text">
+
+  @if (loading()) {
+
+    <div class="event-state">
+      Preparando los detalles de tu evento...
+    </div>
+
+  } @else if (errorMessage()) {
+
+    <div class="event-state">
+      {{ errorMessage() }}
+    </div>
+
+  } @else if (album(); as a) {
+
+    <header class="event-header">
+
+      <span class="event-eyebrow">
+        VYNTRA GALLERY / TU EVENTO
+      </span>
+
+      <h1>Una historia para recordar.</h1>
+
+      <p>
+        Cada celebración tiene su propia magia.
+        Aquí reunimos los detalles de la tuya.
+      </p>
+
+    </header>
+
+    <section class="event-card">
+
+      <span class="event-eyebrow">
+        INFORMACIÓN DE TU CELEBRACIÓN
+      </span>
+
+      <h2>{{ a.title }}</h2>
+
+      <div class="event-information">
+
+        <div class="event-field">
+          <span>Tipo de evento</span>
+          <strong>
+            {{ getEventLabel(a.event_type) }}
+          </strong>
+        </div>
+
+        <div class="event-field">
+          <span>Fecha de celebración</span>
+
+          <strong>
+            @if (a.event_date) {
+              {{ a.event_date | date:'dd/MM/yyyy' }}
+            } @else {
+              Por definir
+            }
+          </strong>
+        </div>
+
+        @if (a.description) {
+
+          <div class="event-field full-width">
+            <span>Sobre tu evento</span>
+            <p>{{ a.description }}</p>
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+    <section class="event-card">
+
+      <span class="event-eyebrow">
+        TU PAQUETE FOTOGRÁFICO
+      </span>
+
+      <h2>Los detalles de tus recuerdos</h2>
+
+      <div class="event-information">
+
+        <div class="event-field">
+          <span>Fotografías incluidas</span>
+          <strong>{{ a.included_photos }}</strong>
+        </div>
+
+        <div class="event-field">
+          <span>Fotografías seleccionadas</span>
+          <strong>{{ selectedCount() }}</strong>
+        </div>
+
+        <div class="event-field">
+          <span>Fotografías adicionales</span>
+          <strong>{{ extraCount() }}</strong>
+        </div>
+
+        <div class="event-field">
+          <span>Valor por fotografía adicional</span>
+          <strong>
+            ${{ a.extra_photo_price | number:'1.0-0' }} COP
+          </strong>
+        </div>
+
+        @if (extraCount() > 0) {
+
+          <div class="event-field full-width extra-total">
+            <span>Valor total de adicionales</span>
+            <strong>
+              ${{ extraTotal() | number:'1.0-0' }} COP
+            </strong>
+          </div>
+
+        }
+
+      </div>
+
+    </section>
+
+    <section class="event-card selection-card">
+
+      <span class="event-eyebrow">
+        ESTADO DE TUS FOTOGRAFÍAS
+      </span>
+
+      @if (selectionClosed()) {
+
+        <h2>¡Ya recibimos tu selección!</h2>
+
+        <p>
+          Tus fotografías elegidas están registradas
+          y listas para continuar con nuestro proceso
+          de edición.
+        </p>
+
+        <span class="event-status">
+          ✓ Selección confirmada
+        </span>
+
+      } @else {
+
+        <h2>Tu selección sigue abierta</h2>
+
+        <p>
+          Puedes continuar eligiendo tus fotografías
+          favoritas desde Mi galería.
+        </p>
+
+        <span class="event-status pending">
+          Selección pendiente
+        </span>
+
+      }
+
+    </section>
+
+    <footer class="event-footer">
+      <strong>VYNTRA</strong>
+      <p>Tus recuerdos, nuestra mirada.</p>
+    </footer>
+
+  }
+
+</div>

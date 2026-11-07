@@ -1,0 +1,619 @@
+
+<div
+  class="gallery-page"
+  [class]="'gallery-page theme-' + theme().name"
+  [style.--gallery-bg]="theme().background"
+  [style.--gallery-surface]="theme().surface"
+  [style.--gallery-accent]="theme().accent"
+  [style.--gallery-text]="theme().text">
+
+  @if (loading()) {
+    <div class="gallery-state">
+      Preparando tus recuerdos...
+    </div>
+
+  } @else if (errorMessage()) {
+    <div class="gallery-state">
+      {{ errorMessage() }}
+    </div>
+
+  } @else if (album(); as a) {
+
+    <div class="gallery-intro">
+
+      <section
+        class="gallery-hero"
+        [style.background-image]="
+          'linear-gradient(90deg, rgba(0,0,0,.91) 0%, rgba(0,0,0,.62) 42%, rgba(0,0,0,.12) 100%), url(&quot;' +
+          heroBackground() + '&quot;)'
+        ">
+
+        <div class="hero-content">
+
+          <span class="hero-eyebrow">
+            VYNTRA GALLERY
+            <span class="eyebrow-line"></span>
+          </span>
+
+          <div class="hero-event-name">
+            {{ a.title }}
+          </div>
+
+          <h1>{{ theme().headline }}</h1>
+
+          <p class="hero-subtitle">
+            {{ a.description?.trim() || theme().subtitle }}
+          </p>
+
+          <div class="hero-details">
+
+            @if (a.event_date) {
+              <div class="hero-detail">
+                <span class="detail-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="5" width="18" height="16" rx="2" />
+                    <path d="M16 3v4M8 3v4M3 10h18" />
+                    <path d="m9 16 2 2 4-4" />
+                  </svg>
+                </span>
+                <span>
+                  {{ a.event_date | date:'d \'de\' MMMM \'de\' y':'':'es-CO' }}
+                </span>
+              </div>
+            }
+
+            <div class="hero-detail">
+              <span class="detail-icon" aria-hidden="true">
+                  @switch (a.event_type) {
+                    @case ('wedding') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/></svg>
+                    }
+                    @case ('quinceanera') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m2 8 5 4 5-7 5 7 5-4-2 11H4L2 8Z"/><path d="M4 22h16"/></svg>
+                    }
+                    @case ('birthday') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16v9H4zM4 16h16M12 8v4M9 8c-1-2 1-3 1-5M15 8c-1-2 1-3 1-5"/></svg>
+                    }
+                    @case ('graduation') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m2 10 10-5 10 5-10 5-10-5ZM6 12v5c4 3 8 3 12 0v-5M22 10v7"/></svg>
+                    }
+                    @case ('baptism') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3"/><path d="M6 21v-3a6 6 0 0 1 12 0v3M9 14l3 3 3-3"/></svg>
+                    }
+                    @case ('first_communion') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v9M8 6h8M5 22V12l7-5 7 5v10H5ZM10 22v-6h4v6"/></svg>
+                    }
+                    @case ('corporate') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13c5 3 13 3 18 0M12 13v3"/></svg>
+                    }
+                    @case ('other') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 17l.7 1.3L21 19l-1.3.7L19 21l-.7-1.3L17 19l1.3-.7L19 17Z"/></svg>
+                    }
+                    @default {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+                    }
+                  }
+                </span>
+              <span>
+                {{ getEventLabel(a.event_type) }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <div class="gallery-stats">
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.7"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="m21 15-5-5L5 21"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <strong>{{ photoCount() }}</strong>
+            <span>Fotografías</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="1.7"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <strong>{{ favoriteCount() }}</strong>
+            <span>Favoritas</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+  stroke="currentColor" stroke-width="1.7"
+  stroke-linecap="round" stroke-linejoin="round">
+
+  <rect x="7" y="7" width="14" height="14" rx="2"/>
+
+  <path d="M3 17V5a2 2 0 0 1 2-2h12"/>
+
+  <circle cx="12" cy="12" r="1.5"/>
+
+  <path d="m8 19 4-4 3 3 2-2 4 4"/>
+
+</svg>
+          </div>
+          <div class="stat-info">
+            <strong>{{ includedCount() }}</strong>
+            <span>Fotos del paquete</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <section class="gallery-body">
+
+      @if (!isAdminPreview()) {
+
+        <div class="selection-panel">
+
+          <div class="selection-panel-header">
+
+            <div>
+              <span class="selection-eyebrow">
+                TUS RECUERDOS
+              </span>
+
+              <h2>
+                {{ theme().selectionHeadline }}
+              </h2>
+
+              @if (selectionClosed()) {
+                <p>
+                  Tus fotografías ya están en nuestras manos.
+                  Gracias por dejarnos ser parte de esta historia.
+                </p>
+              } @else {
+                <p>
+                  {{ theme().selectionDescription }}
+                </p>
+              }
+            </div>
+
+            <span
+              class="selection-status"
+              [class.closed]="selectionClosed()">
+
+              @if (!selectionReady()) {
+                No disponible
+              } @else if (selectionClosed()) {
+                Selección confirmada
+              } @else {
+                Eligiendo recuerdos
+              }
+
+            </span>
+
+          </div>
+
+          <div class="selection-summary">
+
+            <div>
+              <strong>{{ favoriteCount() }}</strong>
+              <span>Fotografías elegidas</span>
+            </div>
+
+            <div>
+              <strong>{{ remainingPhotos() }}</strong>
+              <span>Disponibles en tu paquete</span>
+            </div>
+
+            <div>
+              <strong>{{ extraCount() }}</strong>
+              <span>Fotografías adicionales</span>
+            </div>
+
+          </div>
+
+          @if (a.allow_extra_photos) {
+            <p class="selection-price">
+              Cada fotografía adicional:
+              <strong>
+                ${{ a.extra_photo_price | number:'1.0-0' }} COP
+              </strong>
+
+              @if (extraCount() > 0) {
+                <span class="selection-price-total">
+                  Valor adicional:
+                  <strong>
+                    ${{ extraTotal() | number:'1.0-0' }} COP
+                  </strong>
+                </span>
+              }
+            </p>
+          }
+
+          @if (selectionClosed()) {
+            <div class="selection-notice">
+              <strong>¡Ya tenemos tus fotografías!</strong>
+              <span>
+                Tu selección está confirmada y lista para
+                nuestro proceso de edición. Si necesitas
+                hacer algún cambio, comunícate con Vyntra.
+              </span>
+            </div>
+          } @else if (selectionReady()) {
+            <p class="selection-help">
+              Tómate tu tiempo para elegir.
+              Cuando estés feliz con tus fotografías,
+              podrás enviárnoslas para edición.
+            </p>
+          }
+
+          @if (actionError()) {
+            <p class="selection-error" role="alert">
+              {{ actionError() }}
+            </p>
+          }
+
+          @if (actionMessage()) {
+            <p class="selection-success" role="status">
+              {{ actionMessage() }}
+            </p>
+          }
+
+          @if (canEditSelection()) {
+            <button
+              type="button"
+              class="confirm-selection-button"
+              [disabled]="
+                favoriteCount() === 0 ||
+                pendingIds().size > 0
+              "
+              (click)="requestConfirmation()">
+
+              Enviar mis fotografías para edición
+              <span aria-hidden="true">→</span>
+            </button>
+          }
+
+        </div>
+
+      }
+
+      <div class="gallery-toolbar">
+
+        <div class="category-filters">
+
+          @for (category of categories(); track category.id) {
+
+            <button
+              type="button"
+              class="filter-button"
+              [class.active]="activeFilter() === category.id"
+              (click)="setFilter(category.id)">
+
+              {{ category.label }}
+
+              @if (category.id === 'favorites') {
+                ({{ favoriteCount() }})
+              }
+
+            </button>
+
+          }
+
+        </div>
+
+        <div class="gallery-view-label">
+          <span class="view-icon">▦</span>
+          Tu galería
+        </div>
+
+      </div>
+
+      @if (visiblePhotos().length === 0) {
+
+        <div class="gallery-empty">
+
+          @if (activeFilter() === 'favorites') {
+            <h2>Tus favoritas aparecerán aquí</h2>
+            <p>
+              Explora la galería y elige las fotografías
+              que más te emocionen.
+            </p>
+          } @else {
+            <h2>Los recuerdos están en camino</h2>
+            <p>
+              Pronto podrás descubrir las fotografías
+              de este día tan especial.
+            </p>
+          }
+
+        </div>
+
+      } @else {
+
+        <div class="pinterest-grid">
+
+          @for (photo of visiblePhotos(); track photo.id) {
+
+            <div class="photo-card">
+
+              <button
+                type="button"
+                class="pinterest-item"
+                [disabled]="!photo.previewUrl"
+                (click)="openPhoto(photo)"
+                [attr.aria-label]="
+                  'Ver fotografía ' + photo.file_name
+                ">
+
+                @if (photo.previewUrl) {
+
+                  <img
+                    [src]="photo.previewUrl"
+                    [alt]="photo.file_name"
+                    loading="lazy">
+
+                  <div class="photo-overlay">
+                    <span class="view-photo-label">
+                      Ver fotografía
+                    </span>
+                  </div>
+
+                } @else {
+
+                  <span class="photo-unavailable">
+                    Vista previa no disponible
+                  </span>
+
+                }
+
+              </button>
+
+              @if (!isAdminPreview() && selectionReady()) {
+
+                <button
+                  type="button"
+                  class="favorite-button"
+                  [class.selected]="isFavorite(photo.id)"
+                  [disabled]="
+                    !canEditSelection() ||
+                    isPending(photo.id) ||
+                    !photo.previewUrl
+                  "
+                  [attr.aria-label]="
+                    isFavorite(photo.id)
+                      ? 'Quitar de favoritos'
+                      : 'Agregar a favoritos'
+                  "
+                  [attr.aria-pressed]="isFavorite(photo.id)"
+                  (click)="toggleFavorite(photo)">
+
+                  <svg
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    [attr.fill]="
+                      isFavorite(photo.id)
+                        ? 'currentColor'
+                        : 'none'
+                    ">
+
+                    <path
+                      d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>
+
+                  </svg>
+
+                </button>
+
+              }
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+      <footer class="gallery-footer">
+
+        <div class="gallery-footer-brand">
+          VYNTRA
+        </div>
+
+        <p>Tus recuerdos, nuestra mirada.</p>
+
+        <small>
+          © 2026 Vyntra Gallery.
+          Todos los derechos reservados.
+        </small>
+
+      </footer>
+
+    </section>
+
+  }
+
+  @if (selectedPhoto(); as photo) {
+
+    <div
+      class="photo-viewer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Visualizador de fotografía">
+
+      <button
+        type="button"
+        class="viewer-close"
+        (click)="closePhoto()"
+        aria-label="Cerrar fotografía">
+        ✕
+      </button>
+
+      @if (photo.previewUrl) {
+        <img
+          [src]="photo.previewUrl"
+          [alt]="photo.file_name">
+      }
+
+      @if (!isAdminPreview() && selectionReady()) {
+
+        <button
+          type="button"
+          class="viewer-favorite"
+          [class.selected]="isFavorite(photo.id)"
+          [disabled]="
+            !canEditSelection() ||
+            isPending(photo.id)
+          "
+          (click)="toggleFavorite(photo)">
+
+          {{ isFavorite(photo.id) ? '♥' : '♡' }}
+
+          {{ isFavorite(photo.id)
+            ? 'Quitar de favoritas'
+            : 'Agregar a favoritas' }}
+
+        </button>
+
+      }
+
+      <span class="viewer-caption">
+        {{ photo.file_name }}
+      </span>
+
+    </div>
+
+  }
+
+  @if (showConfirmDialog()) {
+
+    <div
+      class="selection-dialog-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Confirmar fotografías para edición">
+
+      <div class="selection-dialog">
+
+        <span class="selection-eyebrow">
+          VYNTRA GALLERY
+        </span>
+
+        <h2>Un último vistazo a tus recuerdos</h2>
+
+        <p class="dialog-intro">
+          Estas son las fotografías que nos enviarás
+          para darles el toque final.
+        </p>
+
+        <div class="dialog-summary">
+
+          <div class="dialog-summary-row">
+            <span>Tu paquete incluye</span>
+            <strong>{{ includedCount() }} fotografías</strong>
+          </div>
+
+          <div class="dialog-summary-row">
+            <span>Has elegido</span>
+            <strong>{{ favoriteCount() }} fotografías</strong>
+          </div>
+
+          @if (extraCount() > 0) {
+
+            <div class="dialog-summary-row">
+              <span>Fotografías adicionales</span>
+              <strong>{{ extraCount() }}</strong>
+            </div>
+
+            <div class="dialog-summary-row">
+              <span>Valor por fotografía adicional</span>
+              <strong>
+                ${{ album()?.extra_photo_price ?? 0 | number:'1.0-0' }} COP
+              </strong>
+            </div>
+
+            <div class="dialog-total">
+              <span>Total adicional</span>
+              <strong>
+                ${{ extraTotal() | number:'1.0-0' }} COP
+              </strong>
+            </div>
+
+          } @else {
+
+            <div class="dialog-included">
+              Tu selección está dentro de las fotografías
+              incluidas en tu paquete.
+            </div>
+
+          }
+
+        </div>
+
+        @if (extraCount() > 0) {
+          <p class="dialog-payment-note">
+            El valor de las fotografías adicionales
+            será coordinado directamente con nuestro equipo.
+            Este paso no realiza ningún cobro.
+          </p>
+        }
+
+        <p class="dialog-warning">
+          Al confirmar, tu selección quedará cerrada.
+          Si después deseas modificarla, necesitarás
+          comunicarte con Vyntra.
+        </p>
+
+        <p class="dialog-question">
+          ¿Deseas enviarnos estas fotografías para edición?
+        </p>
+
+        <div class="selection-dialog-actions">
+
+          <button
+            type="button"
+            class="dialog-cancel"
+            [disabled]="confirming()"
+            (click)="cancelConfirmation()">
+            Seguir eligiendo
+          </button>
+
+          <button
+            type="button"
+            class="dialog-confirm"
+            [disabled]="confirming()"
+            (click)="confirmSelection()">
+
+            {{ confirming()
+              ? 'Enviando selección...'
+              : 'Sí, enviar para edición' }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

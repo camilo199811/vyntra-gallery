@@ -1,0 +1,215 @@
+
+<div
+  class="client-layout"
+  [class.admin-preview-mode]="isAdminPreview()">
+
+  <aside
+    class="client-sidebar"
+    [class.open]="menuOpen()">
+
+    <div class="brand">
+      <img
+        src="/images/vyntra.webp"
+        alt="Vyntra Gallery"
+        class="brand-logo">
+    </div>
+
+    <nav
+      class="sidebar-navigation"
+      aria-label="Navegación de la galería">
+
+      <a
+        [routerLink]="galleryUrl() + '/album'"
+        routerLinkActive="active"
+        (click)="closeMenu()">
+
+        <svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.7"
+          stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true">
+          <path d="m3 10 9-7 9 7"/>
+          <path d="M5 9v12h14V9"/>
+          <path d="M9 21v-8h6v8"/>
+        </svg>
+
+        <span>Mi galería</span>
+      </a>
+
+      <a
+        [routerLink]="galleryUrl() + '/selection'"
+        routerLinkActive="active"
+        (click)="closeMenu()">
+
+        <svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.7"
+          stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true">
+          <path
+            d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>
+        </svg>
+
+        <span>Mis favoritos</span>
+      </a>
+
+      @if (!isAdminPreview()) {
+
+        <a
+          [routerLink]="galleryUrl()"
+          [routerLinkActiveOptions]="{ exact: true }"
+          routerLinkActive="active"
+          (click)="closeMenu()">
+
+          <svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.7"
+            stroke-linecap="round" stroke-linejoin="round"
+            aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 11v6"/>
+            <path d="M12 7h.01"/>
+          </svg>
+
+          <span>Detalles del evento</span>
+        </a>
+
+      }
+
+    </nav>
+
+    <div
+      class="sidebar-botanical"
+      aria-hidden="true">
+
+      <svg
+        viewBox="0 0 190 300"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+
+        <path
+          d="M-18 293 C42 246 66 199 86 144
+             C100 103 119 62 166 17"
+          stroke="#A68B6B"
+          stroke-width="2"
+          opacity=".75"/>
+
+        <path
+          d="M59 211 C19 194 7 166 10 142
+             C43 145 63 170 59 211Z"
+          fill="#A68B6B" opacity=".58"/>
+
+        <path
+          d="M77 170 C105 143 133 139 154 146
+             C140 171 109 183 77 170Z"
+          fill="#C0A486" opacity=".65"/>
+
+        <path
+          d="M92 132 C64 113 57 86 64 64
+             C88 75 103 101 92 132Z"
+          fill="#A68B6B" opacity=".62"/>
+
+        <path
+          d="M112 94 C143 76 167 80 185 93
+             C167 110 138 115 112 94Z"
+          fill="#C0A486" opacity=".55"/>
+
+        <path
+          d="M138 55 C128 32 133 13 148 0
+             C164 23 158 42 138 55Z"
+          fill="#A68B6B" opacity=".65"/>
+
+        <path
+          d="M37 251 C9 251 -5 238 -14 220
+             C14 213 34 225 37 251Z"
+          fill="#C0A486" opacity=".5"/>
+
+      </svg>
+    </div>
+
+    <div class="sidebar-bottom">
+
+      @if (isAdminPreview()) {
+
+        <div class="preview-indicator">
+          Vista previa administrativa
+        </div>
+
+        <a
+          class="back-admin"
+          [routerLink]="adminAlbumUrl()"
+          (click)="closeMenu()">
+
+          Volver a administración
+        </a>
+
+      } @else {
+
+        <button
+          type="button"
+          class="logout-button"
+          [disabled]="loggingOut()"
+          (click)="logout()">
+
+          <svg viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.7"
+            stroke-linecap="round" stroke-linejoin="round"
+            aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <path d="m16 17 5-5-5-5"/>
+            <path d="M21 12H9"/>
+          </svg>
+
+          <span>
+            {{ loggingOut() ? 'Saliendo...' : 'Cerrar sesión' }}
+          </span>
+
+        </button>
+
+        @if (logoutError()) {
+          <p class="logout-error" role="alert">
+            {{ logoutError() }}
+          </p>
+        }
+
+      }
+
+      <div class="sidebar-footer">
+        © 2026 Vyntra
+        <small>Todos los derechos reservados.</small>
+      </div>
+
+    </div>
+
+  </aside>
+
+  <div
+    class="mobile-overlay"
+    [class.visible]="menuOpen()"
+    (click)="closeMenu()">
+  </div>
+
+  <div class="client-main">
+
+    <header class="mobile-header">
+
+      <img
+        src="/images/vyntra.webp"
+        alt="Vyntra Gallery"
+        class="mobile-logo">
+
+      <button
+        type="button"
+        class="menu-toggle"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        aria-label="Abrir o cerrar menú">
+        ☰
+      </button>
+
+    </header>
+
+    <main class="client-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

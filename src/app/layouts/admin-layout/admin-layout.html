@@ -1,0 +1,92 @@
+<div class="min-h-screen bg-[#faf8fb]">
+
+  <!-- Barra superior móvil -->
+  <header class="lg:hidden flex items-center justify-between
+                 bg-white border-b border-gray-100 px-5 py-4">
+
+    <span class="text-xl font-bold tracking-widest text-purple-900">
+      VYNTRA.
+    </span>
+
+    <button
+      type="button"
+      (click)="toggleMenu()"
+      class="rounded-xl bg-purple-50 px-4 py-2 text-purple-900"
+      aria-label="Abrir menú">
+      ☰
+    </button>
+  </header>
+
+  <!-- Fondo del menú móvil -->
+  @if (menuOpen()) {
+    <button
+      type="button"
+      class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+      (click)="closeMenu()"
+      aria-label="Cerrar menú">
+    </button>
+  }
+
+  <!-- Menú lateral -->
+  <aside
+    class="fixed inset-y-0 left-0 z-50 w-64 bg-white
+           border-r border-gray-100 p-6
+           transition-transform duration-300
+           lg:translate-x-0"
+    [class.-translate-x-full]="!menuOpen()">
+
+    <div class="mb-12">
+      <h1 class="text-2xl font-bold tracking-[0.2em] text-purple-900">
+        VYNTRA.
+      </h1>
+      <p class="mt-1 text-xs tracking-[0.3em] text-gray-400">
+        GALLERY ADMIN
+      </p>
+    </div>
+
+    <nav class="space-y-2">
+
+      <a routerLink="/admin/dashboard"
+         routerLinkActive="bg-purple-50 text-purple-800"
+         (click)="closeMenu()"
+         class="block rounded-xl px-4 py-3 text-sm
+                font-medium text-gray-600 hover:bg-purple-50">
+        ◫ &nbsp; Dashboard
+      </a>
+
+      <a routerLink="/admin/albums"
+         routerLinkActive="bg-purple-50 text-purple-800"
+         (click)="closeMenu()"
+         class="block rounded-xl px-4 py-3 text-sm
+                font-medium text-gray-600 hover:bg-purple-50">
+        ▧ &nbsp; Álbumes
+      </a>
+
+      <a routerLink="/admin/clients"
+         routerLinkActive="bg-purple-50 text-purple-800"
+         (click)="closeMenu()"
+         class="block rounded-xl px-4 py-3 text-sm
+                font-medium text-gray-600 hover:bg-purple-50">
+        ♙ &nbsp; Clientes
+      </a>
+
+    </nav>
+
+    <div class="absolute bottom-8 left-6 right-6
+                rounded-2xl bg-purple-50 p-4">
+      <p class="text-sm font-semibold text-purple-900">
+        Vyntra Gallery
+      </p>
+      <p class="mt-1 text-xs text-gray-500">
+        Tus recuerdos, nuestra mirada.
+      </p>
+    </div>
+
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="lg:ml-64 p-5 md:p-8 lg:p-10">
+    <router-outlet />
+  </main>
+
+</div>

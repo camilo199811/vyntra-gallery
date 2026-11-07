@@ -1,0 +1,237 @@
+
+<div
+  class="selection-page"
+  [style.--selection-bg]="eventTheme().background"
+  [style.--selection-surface]="eventTheme().surface"
+  [style.--selection-accent]="eventTheme().accent"
+  [style.--selection-text]="eventTheme().text">
+
+  @if (loading()) {
+
+    <div class="selection-state">
+      Cargando tus recuerdos...
+    </div>
+
+  } @else if (errorMessage()) {
+
+    <div class="selection-state">
+      {{ errorMessage() }}
+    </div>
+
+  } @else {
+
+    <header class="selection-header">
+
+      <span class="selection-eyebrow">
+        VYNTRA GALLERY / TU SELECCIÓN
+      </span>
+
+      <h1>Los recuerdos que elegiste.</h1>
+
+      <p>
+        Cada imagen cuenta una parte de tu historia.
+        Aquí encontrarás las fotografías que elegiste
+        para conservar.
+      </p>
+
+      @if (selectionClosed()) {
+        <span class="selection-status">
+          ✓ Selección confirmada
+        </span>
+      } @else {
+        <span class="selection-status pending">
+          Selección en proceso
+        </span>
+      }
+
+    </header>
+
+    <div class="selection-stats">
+
+      <article class="selection-stat">
+        <span>Fotografías seleccionadas</span>
+        <strong>{{ selectedCount() }}</strong>
+      </article>
+
+      <article class="selection-stat">
+        <span>Incluidas en tu paquete</span>
+        <strong>{{ includedCount() }}</strong>
+      </article>
+
+      <article class="selection-stat">
+        <span>Fotografías adicionales</span>
+        <strong>{{ extraCount() }}</strong>
+      </article>
+
+    </div>
+
+    @if (extraCount() > 0) {
+
+      <div class="selection-extra">
+
+        <div>
+          <span>Fotografías adicionales</span>
+          <p>
+            {{ extraCount() }} fotografías ×
+            ${{ album()?.extra_photo_price ?? 0 | number:'1.0-0' }} COP
+          </p>
+        </div>
+
+        <strong>
+          ${{ extraTotal() | number:'1.0-0' }} COP
+        </strong>
+
+      </div>
+
+    }
+
+    <section class="selected-gallery">
+
+      <div class="selected-gallery-header">
+
+        <div>
+          <span class="selection-eyebrow">
+            TUS FOTOGRAFÍAS
+          </span>
+
+          <h2>
+            @if (selectionClosed()) {
+              Una historia que ya está en nuestras manos
+            } @else {
+              Cada recuerdo cuenta
+            }
+          </h2>
+
+          <p>
+            @if (selectionClosed()) {
+              Estas son las fotografías que nos enviaste
+              para edición. Puedes volver a verlas
+              cuando quieras.
+            } @else {
+              Aquí puedes revisar las fotografías que
+              llevas elegidas. Para hacer cambios,
+              regresa a Mi galería.
+            }
+          </p>
+        </div>
+
+        <span class="gallery-count">
+          {{ selectedPhotos().length }} fotografías
+        </span>
+
+      </div>
+
+      @if (selectedCount() === 0) {
+
+        <div class="selection-empty">
+          <div class="empty-heart">♡</div>
+
+          <h3>Tu historia comienza aquí</h3>
+
+          <p>
+            Cuando elijas tus fotografías favoritas,
+            aparecerán en este espacio.
+          </p>
+        </div>
+
+      } @else if (selectedPhotos().length === 0) {
+
+        <div class="selection-empty">
+          <h3>No encontramos las vistas previas</h3>
+
+          <p>
+            Tu selección está registrada, pero no pudimos
+            encontrar las fotografías del álbum.
+          </p>
+        </div>
+
+      } @else {
+
+        <div class="selection-photo-grid">
+
+          @for (photo of selectedPhotos(); track photo.id) {
+
+            <div class="selected-photo-card">
+
+              <button
+                type="button"
+                class="selected-photo-button"
+                [disabled]="!photo.previewUrl"
+                (click)="openPhoto(photo)"
+                [attr.aria-label]="
+                  'Ampliar fotografía ' + photo.file_name
+                ">
+
+                @if (photo.previewUrl) {
+
+                  <img
+                    [src]="photo.previewUrl"
+                    [alt]="photo.file_name"
+                    loading="lazy">
+
+                  <span class="photo-zoom">
+                    Ver fotografía
+                  </span>
+
+                } @else {
+
+                  <span class="photo-unavailable">
+                    Vista previa no disponible
+                  </span>
+
+                }
+
+              </button>
+
+              <div class="selected-photo-mark">
+                <span>♥</span>
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+    <footer class="selection-footer">
+      <strong>VYNTRA</strong>
+      <p>Tus recuerdos, nuestra mirada.</p>
+    </footer>
+
+  }
+
+  @if (selectedPhoto(); as photo) {
+
+    <div
+      class="selection-viewer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Visualizador de fotografía">
+
+      <button
+        type="button"
+        class="viewer-close"
+        aria-label="Cerrar fotografía"
+        (click)="closePhoto()">
+        ✕
+      </button>
+
+      @if (photo.previewUrl) {
+        <img
+          [src]="photo.previewUrl"
+          [alt]="photo.file_name">
+      }
+
+      <div class="viewer-bottom">
+        <span>♥ Una de tus fotografías elegidas</span>
+      </div>
+
+    </div>
+
+  }
+
+</div>

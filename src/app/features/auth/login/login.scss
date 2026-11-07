@@ -1,0 +1,402 @@
+.login-page {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  min-height: 100dvh;
+  background: #080808;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+/* PANEL IZQUIERDO */
+
+.brand-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 65px 7%;
+  color: #fff;
+  background: #080808;
+}
+
+.brand-logo,
+.brand-content,
+.brand-footer {
+  position: relative;
+  z-index: 2;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.official-logo {
+  display: block;
+  width: 150px;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 767px) {
+  .official-logo {
+    width: 125px;
+  }
+}
+
+.brand-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.brand-product {
+  color: #d5d5d5;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 3px;
+}
+
+@media (max-width: 767px) {
+  .official-logo {
+    width: 95px;
+    height: 72px;
+  }
+
+  .brand-logo {
+    gap: 12px;
+  }
+
+  .brand-product {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+}
+
+.brand-content {
+  max-width: 580px;
+}
+
+.brand-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 32px;
+  font-size: 12px;
+  letter-spacing: 4px;
+}
+
+.eyebrow-line {
+  width: 90px;
+  height: 1px;
+  background: #fff;
+}
+
+.brand-content h2 {
+  margin: 0;
+  font-size: clamp(35px, 3.2vw, 56px);
+  font-weight: 650;
+  line-height: 1.14;
+  letter-spacing: -1.5px;
+}
+
+.brand-content p {
+  max-width: 480px;
+  margin-top: 26px;
+  color: #bdbdbd;
+  font-size: 16px;
+  line-height: 1.8;
+}
+
+.brand-watermark {
+  position: absolute;
+  right: -35px;
+  bottom: -130px;
+  color: rgba(255, 255, 255, 0.035);
+  font-size: 550px;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.brand-footer {
+  color: #a6a6a6;
+  font-size: 12px;
+}
+
+/* PANEL DERECHO */
+
+.login-panel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 40px;
+  background-image: url('/images/login-camera.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 520px;
+  padding: 48px;
+  color: white;
+  background: rgba(10, 10, 10, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.card-accent {
+  width: 45px;
+  height: 2px;
+  margin-bottom: 28px;
+  background: #fff;
+}
+
+.login-card h2 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 650;
+  letter-spacing: -1px;
+}
+
+.login-description {
+  margin: 12px 0 36px;
+  color: #bdbdbd;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* FORMULARIO */
+
+.form-group {
+  margin-bottom: 25px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 11px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 56px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 12px;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: #fff;
+}
+
+.input-icon {
+  color: #d1d1d1;
+  font-size: 20px;
+}
+
+.input-wrapper input {
+  width: 100%;
+  min-width: 0;
+  padding: 15px 0;
+  color: white;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.input-wrapper input::placeholder {
+  color: #999;
+}
+
+.password-toggle {
+  flex-shrink: 0;
+  color: #ddd;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.field-error {
+  display: block;
+  margin-top: 8px;
+  color: #ffaaaa;
+}
+
+.login-error {
+  margin-bottom: 20px;
+  padding: 13px;
+  color: #ffb5b5;
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 10px;
+  color: #111;
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.login-button:hover:not(:disabled) {
+  background: #dedede;
+  transform: translateY(-2px);
+}
+
+.login-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-footer {
+  margin-top: 34px;
+  color: #999;
+  text-align: center;
+  font-size: 11px;
+}
+
+/* TABLETS */
+
+@media (max-width: 1024px) {
+  .login-page {
+    grid-template-columns: 40% 60%;
+  }
+
+  .brand-panel {
+    padding: 45px 8%;
+  }
+
+  .brand-content h2 {
+    font-size: 36px;
+  }
+
+  .login-card {
+    padding: 35px;
+  }
+}
+
+/* CELULARES */
+
+@media (max-width: 767px) {
+  .login-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-panel {
+    min-height: 155px;
+    padding: 28px 24px;
+  }
+
+  .brand-logo h1 {
+    font-size: 25px;
+    letter-spacing: 6px;
+  }
+
+  .brand-logo span {
+    font-size: 9px;
+  }
+
+  .brand-content,
+  .brand-footer,
+  .brand-watermark {
+    display: none;
+  }
+
+  .login-panel {
+    flex: 1;
+    min-height: calc(100dvh - 155px);
+    padding: 30px 16px;
+  }
+
+  .login-card {
+    max-width: 440px;
+    padding: 32px 23px;
+    border-radius: 20px;
+  }
+
+  .login-card h2 {
+    font-size: 29px;
+  }
+
+  .login-description {
+    margin-bottom: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-button {
+    transition: none;
+  }
+}
+
+/* Campos autocompletados por Chrome y Edge */
+
+.input-wrapper input:-webkit-autofill,
+.input-wrapper input:-webkit-autofill:hover,
+.input-wrapper input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  -webkit-box-shadow: 0 0 0 1000px #202020 inset !important;
+  box-shadow: 0 0 0 1000px #202020 inset !important;
+  border-radius: 4px;
+}
+
+/* Mejorar interacción */
+
+.input-wrapper {
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.input-wrapper:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.input-wrapper:focus-within {
+  background: rgba(255, 255, 255, 0.075);
+  border-color: #ffffff;
+}
+
+.login-button:focus-visible,
+.password-toggle:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}

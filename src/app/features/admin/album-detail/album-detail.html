@@ -1,0 +1,1080 @@
+
+<section class="album-detail-page">
+
+  <a routerLink="/admin/albums" class="back-link">
+    ← Volver a álbumes
+  </a>
+
+  @if (loading()) {
+    <div class="state-message">Cargando álbum...</div>
+  } @else if (errorMessage()) {
+    <div class="state-message">{{ errorMessage() }}</div>
+  } @else if (album(); as a) {
+
+    <!-- ENCABEZADO -->
+
+    <header class="album-header">
+      <div>
+        <span class="eyebrow">VYNTRA / ADMINISTRACIÓN</span>
+        <h1>{{ a.title }}</h1>
+        <p>{{ getEventLabel(a.event_type) }}</p>
+      </div>
+
+      <div class="album-header-actions">
+        <span
+          class="status-badge"
+          [class.published]="a.status === 'published'"
+          [class.archived]="a.status === 'archived'">
+          {{ getStatusLabel(a.status) }}
+        </span>
+
+        <a
+          class="client-preview-button"
+          [routerLink]="['/admin-preview', a.id]">
+          <span>◉</span>
+          Vista previa del cliente
+        </a>
+      </div>
+    </header>
+
+    <!-- INFORMACIÓN EDITABLE DEL ÁLBUM -->
+    <section class="album-edit-panel">
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">DATOS DEL EVENTO</span>
+          <h2>Información y configuración del álbum</h2>
+          <p>Consulta y modifica los datos que aparecen en la galería del cliente.</p>
+        </div>
+        @if (!editingAlbum()) {
+          <button type="button" class="album-edit-primary" (click)="beginAlbumEdit()">
+            ✎ Editar información
+          </button>
+        }
+      </div>
+
+      @if (editSuccess()) {
+        <div class="selection-alert success" role="status">{{ editSuccess() }}</div>
+      }
+      @if (editError()) {
+        <div class="selection-alert error" role="alert">{{ editError() }}</div>
+      }
+
+      @if (editingAlbum()) {
+        <form class="album-edit-form" (submit)="$event.preventDefault(); saveAlbumEdit()">
+          <div class="album-edit-grid">
+            <label class="album-edit-field album-edit-wide">
+              <span>Nombre del álbum *</span>
+              <input type="text" required maxlength="200" [value]="editForm().title"
+                (input)="changeAlbumField('title', $event)" />
+            </label>
+            <label class="album-edit-field">
+              <span>Tipo de evento *</span>
+              <select [value]="editForm().event_type" (change)="changeAlbumField('event_type', $event)">
+                <option value="wedding">Matrimonio</option>
+                <option value="birthday">Cumpleaños</option>
+                <option value="quinceanera">Quinceaños</option>
+                <option value="graduation">Grado</option>
+                <option value="baptism">Bautizo</option>
+                <option value="first_communion">Primera comunión</option>
+                <option value="corporate">Evento corporativo</option>
+                <option value="other">Otro evento</option>
+              </select>
+            </label>
+            <label class="album-edit-field">
+              <span>Fecha del evento</span>
+              <input type="date" [value]="editForm().event_date"
+                (input)="changeAlbumField('event_date', $event)" />
+            </label>
+            <label class="album-edit-field album-edit-wide">
+              <span>Descripción del álbum</span>
+              <textarea rows="4" [value]="editForm().description"
+                placeholder="Describe brevemente este evento..."
+                (input)="changeAlbumField('description', $event)"></textarea>
+              <small>Si la dejas vacía, la galería mostrará la descripción genérica del evento.</small>
+            </label>
+          </div>
+          <h3>Paquete fotográfico</h3>
+          <div class="album-edit-grid">
+            <label class="album-edit-field">
+              <span>Fotografías incluidas *</span>
+              <input type="number" min="0" step="1" required [value]="editForm().included_photos"
+                (input)="changeAlbumField('included_photos', $event)" />
+            </label>
+            <label class="album-edit-field">
+              <span>Precio por fotografía adicional (COP) *</span>
+              <input type="number" min="0" step="1" required [value]="editForm().extra_photo_price"
+                (input)="changeAlbumField('extra_photo_price', $event)" />
+            </label>
+          </div>
+          <label class="album-edit-check">
+            <input type="checkbox" [checked]="editForm().allow_extra_photos"
+              (change)="changeAlbumField('allow_extra_photos', $event)" />
+            <span>Permitir fotografías adicionales</span>
+          </label>
+          <h3>Privacidad y protección</h3>
+          <label class="album-edit-check">
+            <input type="checkbox" [checked]="editForm().watermark_enabled"
+              (change)="changeAlbumField('watermark_enabled', $event)" />
+            <span>Marca de agua Vyntra</span>
+          </label>
+          <label class="album-edit-check">
+            <input type="checkbox" [checked]="editForm().allow_downloads"
+              (change)="changeAlbumField('allow_downloads', $event)" />
+            <span>Permitir descargas</span>
+          </label>
+          <p class="album-edit-note">Los cambios de marca de agua se aplicarán al procesar nuevas fotografías; no regeneran las vistas previas existentes.</p>
+          <div class="album-edit-actions">
+            <button type="button" class="album-edit-cancel" [disabled]="savingAlbum()" (click)="cancelAlbumEdit()">Cancelar</button>
+            <button type="submit" class="album-edit-primary" [disabled]="savingAlbum()">
+              {{ savingAlbum() ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </form>
+      } @else {
+        <div class="album-edit-readonly">
+          <div><span>Nombre del álbum</span><strong>{{ a.title }}</strong></div>
+          <div><span>Tipo de evento</span><strong>{{ getEventLabel(a.event_type) }}</strong></div>
+          <div><span>Fecha del evento</span><strong>{{ a.event_date || 'Sin fecha' }}</strong></div>
+          <div class="album-edit-full"><span>Descripción del álbum</span><strong>{{ a.description || 'Sin descripción personalizada (se muestra la genérica)' }}</strong></div>
+          <div><span>Fotografías incluidas</span><strong>{{ a.included_photos }}</strong></div>
+          <div><span>Fotografía adicional</span><strong>${{ a.extra_photo_price | number:'1.0-0' }} COP</strong></div>
+          <div><span>Fotografías adicionales</span><strong>{{ a.allow_extra_photos ? 'Permitidas' : 'No permitidas' }}</strong></div>
+          <div><span>Marca de agua</span><strong>{{ a.watermark_enabled ? 'Activada' : 'Desactivada' }}</strong></div>
+          <div><span>Descargas</span><strong>{{ a.allow_downloads ? 'Permitidas' : 'No permitidas' }}</strong></div>
+        </div>
+      }
+    </section>
+
+    <!-- PUBLICACIÓN DEL EVENTO -->
+
+    <section class="album-status-panel">
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">PUBLICACIÓN DEL EVENTO</span>
+          <h2>Estado del álbum</h2>
+          <p>Controla cuándo estará disponible este evento para el cliente.</p>
+        </div>
+
+        <span
+          class="status-badge"
+          [class.published]="a.status === 'published'"
+          [class.archived]="a.status === 'archived'">
+          {{ getStatusLabel(a.status) }}
+        </span>
+      </div>
+
+      @if (statusSuccess()) {
+        <div class="selection-alert success" role="status">
+          {{ statusSuccess() }}
+        </div>
+      }
+
+      @if (statusError()) {
+        <div class="selection-alert error" role="alert">
+          {{ statusError() }}
+        </div>
+      }
+
+      <div class="album-status-content">
+        <div class="album-status-description">
+          <span
+            class="status-indicator"
+            [class.is-published]="a.status === 'published'"
+            [class.is-archived]="a.status === 'archived'">
+          </span>
+
+          <div>
+            <h3>{{ getStatusLabel(a.status) }}</h3>
+            <p>{{ getStatusDescription(a.status) }}</p>
+          </div>
+        </div>
+
+        <div class="album-status-actions">
+          @if (a.status !== 'published') {
+            <button
+              type="button"
+              class="album-status-button publish"
+              [disabled]="updatingStatus()"
+              (click)="requestStatusChange('published')">
+              Publicar álbum
+            </button>
+          }
+
+          @if (a.status !== 'draft') {
+            <button
+              type="button"
+              class="album-status-button draft"
+              [disabled]="updatingStatus()"
+              (click)="requestStatusChange('draft')">
+              Volver a borrador
+            </button>
+          }
+
+          @if (a.status !== 'archived') {
+            <button
+              type="button"
+              class="album-status-button archive"
+              [disabled]="updatingStatus()"
+              (click)="requestStatusChange('archived')">
+              Archivar álbum
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- INFORMACIÓN DEL PAQUETE -->
+
+    <div class="summary-grid">
+      <article class="summary-card">
+        <span>Fotografías incluidas</span>
+        <strong>{{ a.included_photos }}</strong>
+        <p>Cantidad contratada por el cliente</p>
+      </article>
+
+      <article class="summary-card">
+        <span>Fotografía adicional</span>
+        <strong>
+          ${{ a.extra_photo_price | number:'1.0-0' }}
+        </strong>
+        <p>Precio en pesos colombianos</p>
+      </article>
+
+      <article class="summary-card">
+        <span>Marca de agua</span>
+        <strong>
+          {{ a.watermark_enabled ? 'Activada' : 'Desactivada' }}
+        </strong>
+        <p>Protección de previsualizaciones</p>
+      </article>
+    </div>
+
+    <!-- SELECCIÓN OFICIAL -->
+
+    <section class="client-selection-summary">
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">SELECCIÓN OFICIAL</span>
+          <h2>Fotografías elegidas por el cliente</h2>
+          <p>
+            Identifica cuáles fotografías seleccionó el cliente
+            y cuáles no formarán parte de su entrega.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="refresh-selection-button"
+          [disabled]="loadingFavorites() || loadingSelection()"
+          (click)="refreshClientSelection()">
+          {{
+            loadingFavorites() || loadingSelection()
+              ? 'Actualizando...'
+              : '↻ Actualizar selección'
+          }}
+        </button>
+      </div>
+
+      @if (selectionControl(); as control) {
+        <div
+          class="client-selection-state"
+          [class.confirmed]="control.selection_status === 'closed'">
+
+          @if (control.selection_status === 'closed') {
+            ✓ Selección confirmada por el cliente
+          } @else {
+            ◷ Selección abierta: el cliente todavía puede realizar cambios
+          }
+        </div>
+      } @else {
+        <div class="client-selection-state">
+          No se pudo determinar el estado de la selección.
+        </div>
+      }
+
+      @if (favoritesError()) {
+        <div class="selection-alert error" role="alert">
+          {{ favoritesError() }}
+        </div>
+      }
+
+      @if (loadingFavorites()) {
+        <div class="state-message">
+          Consultando fotografías seleccionadas...
+        </div>
+      } @else if (favoritesLoaded()) {
+
+        <div class="client-selection-stats">
+          <div>
+            <strong>{{ photoCount() }}</strong>
+            <span>Total de fotografías</span>
+          </div>
+
+          <div>
+            <strong>{{ selectedPhotoCount() }}</strong>
+            <span>Elegidas por el cliente</span>
+          </div>
+
+          <div>
+            <strong>{{ unselectedPhotoCount() }}</strong>
+            <span>No seleccionadas</span>
+          </div>
+        </div>
+
+        @if (extraPhotoCount() > 0) {
+          <div class="extra-photo-summary">
+            <span>
+              {{ extraPhotoCount() }} fotografía(s) adicional(es)
+            </span>
+            <strong>
+              ${{ extraPhotoTotal() | number:'1.0-0' }} COP
+            </strong>
+          </div>
+        }
+
+        @if (!selectionClosed()) {
+          <p class="selection-explanation">
+            Esta selección todavía no es definitiva. Las fotografías
+            permanecerán a color hasta que el cliente confirme.
+          </p>
+        } @else {
+          <p class="selection-explanation">
+            Las fotografías seleccionadas permanecen a color.
+            Las que no fueron elegidas aparecen en gris.
+            Ninguna fotografía se elimina automáticamente.
+          </p>
+        }
+      }
+    </section>
+
+    <!-- GALERÍA ADMINISTRATIVA -->
+
+    <section class="photos-panel">
+
+      <!-- ENCABEZADO Y BOTÓN DE SUBIDA -->
+
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">
+            GALERÍA FOTOGRÁFICA
+          </span>
+
+          <h2>Fotografías del álbum</h2>
+
+          <p>
+            Administra los archivos originales, las vistas previas
+            y la selección realizada por el cliente.
+          </p>
+        </div>
+
+        <div class="photo-toolbar">
+          <span class="photo-counter">
+            {{ photoCount() }} fotografías
+          </span>
+
+          <label
+            class="upload-button"
+            [class.is-disabled]="uploading()">
+
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp,.arw,image/jpeg,image/png,image/webp"
+              multiple
+              [disabled]="uploading()"
+              (change)="onFilesSelected($event)">
+
+            <span>
+              {{ uploading() ? 'Subiendo...' : '+ Subir fotografías' }}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- LIMPIEZA DEL ÁLBUM -->
+      <!-- FUERA DEL ENCABEZADO PARA OCUPAR TODO EL ANCHO -->
+
+      @if (
+        selectionClosed() &&
+        favoritesLoaded() &&
+        !loadingFavorites()
+      ) {
+        <section class="album-cleanup">
+
+          <div class="album-cleanup-info">
+            <span class="album-cleanup-eyebrow">
+              ORGANIZACIÓN DEL ÁLBUM
+            </span>
+
+            <h3>Limpieza de fotografías</h3>
+
+            <p>
+              El cliente ya confirmó su selección.
+              Puedes eliminar las fotografías que no eligió
+              y conservar las que debemos editar.
+            </p>
+
+            <div class="album-cleanup-counts">
+              <span>
+                {{ selectedPhotoCount() }} seleccionadas
+              </span>
+
+              <span>
+                {{ unselectedPhotoCount() }} por eliminar
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="album-cleanup-button"
+            [disabled]="cleaningAlbum() || unselectedPhotoCount() === 0"
+            (click)="openCleanupConfirmation()">
+
+            @if (unselectedPhotoCount() === 0) {
+              Álbum organizado
+            } @else {
+              Eliminar no seleccionadas
+            }
+          </button>
+
+        </section>
+      }
+
+      <!-- MENSAJES DE LIMPIEZA -->
+
+      @if (cleanupSuccess()) {
+        <p class="cleanup-success" role="status">
+          {{ cleanupSuccess() }}
+        </p>
+      }
+
+      @if (cleanupError()) {
+        <p class="cleanup-error" role="alert">
+          {{ cleanupError() }}
+        </p>
+      }
+
+      <!-- CONFIRMACIÓN DE LIMPIEZA -->
+
+      @if (showCleanupConfirm()) {
+        <div class="cleanup-overlay">
+          <section
+            class="cleanup-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cleanup-title">
+
+            <span class="cleanup-warning-icon">!</span>
+
+            <h2 id="cleanup-title">
+              ¿Eliminar fotografías no seleccionadas?
+            </h2>
+
+            <p>
+              Se eliminarán permanentemente
+              <strong>{{ unselectedPhotoCount() }}</strong>
+              fotografías del álbum y sus archivos
+              almacenados en Supabase.
+            </p>
+
+            <div class="cleanup-protected">
+              Se conservarán las
+              <strong>{{ selectedPhotoCount() }}</strong>
+              fotografías elegidas por el cliente.
+            </div>
+
+            @if (cleaningAlbum()) {
+              <p>
+                Procesando fotografías:
+                {{ cleanupCompleted() }}
+                de {{ unselectedPhotoCount() }}
+              </p>
+            }
+
+            <div class="cleanup-actions">
+              <button
+                type="button"
+                class="cleanup-cancel"
+                [disabled]="cleaningAlbum()"
+                (click)="closeCleanupConfirmation()">
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                class="cleanup-confirm"
+                [disabled]="cleaningAlbum()"
+                (click)="confirmCleanup()">
+                {{
+                  cleaningAlbum()
+                    ? 'Eliminando...'
+                    : 'Sí, eliminar fotografías'
+                }}
+              </button>
+            </div>
+
+          </section>
+        </div>
+      }
+
+      <!-- MENSAJES DE CARGA Y ELIMINACIÓN -->
+
+      @if (uploadSuccess()) {
+        <div class="selection-alert success" role="status">
+          {{ uploadSuccess() }}
+        </div>
+      }
+
+      @if (uploadError()) {
+        <div class="selection-alert error" role="alert">
+          {{ uploadError() }}
+        </div>
+      }
+
+      @if (deleteSuccess()) {
+        <div class="selection-alert success" role="status">
+          {{ deleteSuccess() }}
+        </div>
+      }
+
+      @if (deleteError()) {
+        <div class="selection-alert error" role="alert">
+          {{ deleteError() }}
+        </div>
+      }
+
+      <!-- PROGRESO DE SUBIDA -->
+
+      @if (uploading()) {
+        <div class="upload-progress-panel">
+          <div class="progress-heading">
+            <strong>Procesando fotografías</strong>
+            <span>
+              {{ uploadCompleted() }} de {{ uploadTotal() }}
+            </span>
+          </div>
+
+          <div
+            class="progress-track"
+            role="progressbar"
+            [attr.aria-valuenow]="uploadProgress()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-label="Progreso de carga">
+
+            <div
+              class="progress-fill"
+              [style.width.%]="uploadProgress()">
+            </div>
+          </div>
+
+          <p>
+            No cierres esta página mientras se procesan las fotografías.
+          </p>
+        </div>
+      }
+
+      <!-- FOTOGRAFÍAS -->
+
+      @if (loadingPhotos()) {
+        <div class="state-message">
+          Cargando fotografías...
+        </div>
+
+      } @else if (photos().length === 0) {
+
+        <div class="photos-empty">
+          <div class="empty-icon">▧</div>
+
+          <h3>Prepara tu galería fotográfica</h3>
+
+          <p>
+            Sube las fotografías originales.
+            Vyntra generará las vistas previas y aplicará
+            la marca de agua cuando esté activada.
+          </p>
+
+          <label
+            class="upload-button empty-upload"
+            [class.is-disabled]="uploading()">
+
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp,.arw,image/jpeg,image/png,image/webp"
+              multiple
+              [disabled]="uploading()"
+              (change)="onFilesSelected($event)">
+
+            Seleccionar fotografías
+          </label>
+        </div>
+
+      } @else {
+
+        <div class="photos-grid">
+
+          @for (photo of photos(); track photo.id) {
+
+            <article
+              class="photo-card"
+              [class.client-selected]="
+                showSelectionResults && isClientSelected(photo.id)
+              "
+              [class.client-not-selected]="
+                showSelectionResults && !isClientSelected(photo.id)
+              ">
+
+              @if (showSelectionResults) {
+                <div
+                  class="client-photo-label"
+                  [class.not-selected]="!isClientSelected(photo.id)">
+
+                  {{
+                    isClientSelected(photo.id)
+                      ? '✓ Seleccionada'
+                      : 'No elegida'
+                  }}
+                </div>
+              }
+
+              <button
+                type="button"
+                class="photo-image-button"
+                [disabled]="!photo.previewUrl"
+                (click)="openPhoto(photo)">
+
+                @if (photo.previewUrl) {
+                  <img
+                    [src]="photo.previewUrl"
+                    [alt]="photo.file_name"
+                    loading="lazy">
+                } @else {
+                  <span class="photo-no-preview">
+                    Vista previa no disponible
+                  </span>
+                }
+
+                <span class="photo-view-label">
+                  Ver fotografía
+                </span>
+              </button>
+
+              <div class="photo-card-footer">
+                <span
+                  class="photo-file-name"
+                  [title]="photo.file_name">
+                  {{ photo.file_name }}
+                </span>
+
+                <span class="photo-file-size">
+                  {{
+                    (photo.file_size ?? 0) / 1048576
+                    | number:'1.1-1'
+                  }} MB
+                </span>
+              </div>
+
+              <button
+                type="button"
+                class="delete-photo-button"
+                [disabled]="deletingPhoto() || uploading()"
+                (click)="openDeleteConfirmation(photo)">
+
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true">
+                  <path d="M3 6h18"/>
+                  <path d="M8 6V4h8v2"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 10v7M14 10v7"/>
+                </svg>
+
+                Eliminar fotografía
+              </button>
+
+            </article>
+          }
+
+        </div>
+      }
+
+    </section>
+
+    <!-- CONTROL DE SELECCIÓN -->
+
+    <section class="selection-panel">
+
+      <div class="section-heading">
+        <div>
+          <span class="section-eyebrow">
+            GESTIÓN DEL CLIENTE
+          </span>
+
+          <h2>Control de selección</h2>
+
+          <p>
+            Administra el acceso del cliente a la selección
+            de sus fotografías.
+          </p>
+        </div>
+
+        @if (selectionControl(); as control) {
+          <span
+            class="selection-status"
+            [class.is-open]="control.selection_status === 'open'"
+            [class.is-closed]="control.selection_status === 'closed'">
+
+            <span class="status-dot"></span>
+
+            {{
+              control.selection_status === 'open'
+                ? 'Selección abierta'
+                : 'Selección cerrada'
+            }}
+          </span>
+        }
+      </div>
+
+      @if (successMessage()) {
+        <div class="selection-alert success" role="status">
+          {{ successMessage() }}
+        </div>
+      }
+
+      @if (selectionError()) {
+        <div class="selection-alert error" role="alert">
+          {{ selectionError() }}
+        </div>
+      }
+
+      @if (loadingSelection()) {
+        <div class="state-message">
+          Consultando control de selección...
+        </div>
+
+      } @else if (selectionControl(); as control) {
+
+        <div class="selection-overview">
+
+          <div class="selection-info">
+            <div class="selection-icon">✓</div>
+
+            <div>
+              <h3>
+                {{
+                  control.selection_status === 'open'
+                    ? 'Selección disponible'
+                    : 'Selección finalizada'
+                }}
+              </h3>
+
+              <p>
+                @if (control.selection_status === 'open') {
+                  El cliente tiene habilitada la selección
+                  de fotografías de este álbum.
+                } @else {
+                  El cliente tiene su selección cerrada.
+                  No puede realizar modificaciones.
+                }
+              </p>
+
+              @if (control.closed_at) {
+                <p>
+                  Fecha de cierre:
+                  {{ formatDate(control.closed_at) }}
+                </p>
+              }
+
+              @if (control.reopened_at) {
+                <p>
+                  Última reapertura:
+                  {{ formatDate(control.reopened_at) }}
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="selection-divider"></div>
+
+          <div class="reopen-section">
+            <div class="reopen-information">
+
+              <span class="reopen-label">
+                REAPERTURA EXTRAORDINARIA
+              </span>
+
+              <h3>
+                {{
+                  control.reopen_used
+                    ? 'Reapertura utilizada'
+                    : 'Una oportunidad adicional'
+                }}
+              </h3>
+
+              <p>
+                @if (control.reopen_used) {
+                  Este álbum ya utilizó su autorización
+                  extraordinaria de selección.
+                  No se permiten nuevas reaperturas.
+                } @else {
+                  Puedes permitir que el cliente vuelva
+                  a modificar su selección una sola vez.
+                  Sus fotografías anteriores se conservarán.
+                }
+              </p>
+
+              <span
+                class="reopen-availability"
+                [class.used]="control.reopen_used">
+
+                {{
+                  control.reopen_used
+                    ? '0 de 1 reaperturas disponibles'
+                    : '1 de 1 reaperturas disponibles'
+                }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="reopen-button"
+              [disabled]="
+                !canReopen() ||
+                reopening() ||
+                loadingSelection()
+              "
+              (click)="openReopenConfirmation()">
+
+              {{
+                control.reopen_used
+                  ? 'Reapertura utilizada'
+                  : control.selection_status === 'open'
+                    ? 'Selección abierta'
+                    : 'Autorizar reapertura'
+              }}
+            </button>
+          </div>
+
+        </div>
+      }
+
+    </section>
+
+    <!-- VISUALIZADOR DE FOTOGRAFÍAS -->
+
+    @if (selectedPreview(); as photo) {
+      <div
+        class="photo-lightbox"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Vista previa de fotografía">
+
+        <div class="photo-lightbox-header">
+          <span>{{ photo.file_name }}</span>
+
+          <button
+            type="button"
+            (click)="closePhoto()"
+            aria-label="Cerrar fotografía">
+            ✕
+          </button>
+        </div>
+
+        @if (photo.previewUrl) {
+          <img
+            [src]="photo.previewUrl"
+            [alt]="photo.file_name">
+        }
+
+        <p>Vista previa de Vyntra Gallery</p>
+      </div>
+    }
+
+    <!-- CONFIRMACIÓN DE ELIMINACIÓN INDIVIDUAL -->
+
+    @if (showDeleteConfirm()) {
+      @if (photoToDelete(); as photo) {
+
+        <div class="reopen-backdrop">
+          <section
+            class="reopen-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-photo-title">
+
+            <div class="dialog-icon delete-icon">⌫</div>
+
+            <h2 id="delete-photo-title">
+              Eliminar fotografía
+            </h2>
+
+            <p>
+              ¿Seguro que deseas eliminar
+              <strong>{{ photo.file_name }}</strong>?
+              Se eliminarán el original, la vista previa
+              y su registro. Esta acción no se puede deshacer.
+            </p>
+
+            @if (deleteError()) {
+              <div class="selection-alert error" role="alert">
+                {{ deleteError() }}
+              </div>
+            }
+
+            <div class="dialog-actions">
+              <button
+                type="button"
+                class="cancel-button"
+                [disabled]="deletingPhoto()"
+                (click)="closeDeleteConfirmation()">
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                class="confirm-button delete-confirm"
+                [disabled]="deletingPhoto()"
+                (click)="confirmDeletePhoto()">
+
+                {{
+                  deletingPhoto()
+                    ? 'Eliminando...'
+                    : 'Sí, eliminar fotografía'
+                }}
+              </button>
+            </div>
+
+          </section>
+        </div>
+      }
+    }
+
+    <!-- CONFIRMACIÓN DE REAPERTURA -->
+
+    @if (showReopenConfirm()) {
+      <div class="reopen-backdrop">
+        <section
+          class="reopen-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reopen-title">
+
+          <div class="dialog-icon">↻</div>
+
+          <h2 id="reopen-title">
+            Autorizar nueva selección
+          </h2>
+
+          <p>
+            Estás a punto de permitir que el cliente
+            vuelva a modificar las fotografías
+            del álbum <strong>{{ a.title }}</strong>.
+          </p>
+
+          <div class="dialog-notice">
+            Esta autorización solo puede utilizarse
+            una vez por álbum y no podrá revertirse
+            desde este panel.
+          </div>
+
+          <div class="dialog-actions">
+            <button
+              type="button"
+              class="cancel-button"
+              [disabled]="reopening()"
+              (click)="closeReopenConfirmation()">
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="confirm-button"
+              [disabled]="reopening()"
+              (click)="confirmReopen()">
+
+              {{
+                reopening()
+                  ? 'Autorizando...'
+                  : 'Confirmar reapertura'
+              }}
+            </button>
+          </div>
+
+        </section>
+      </div>
+    }
+
+    <!-- CONFIRMACIÓN DE CAMBIO DE ESTADO -->
+
+    @if (pendingStatus(); as nextStatus) {
+      <div class="reopen-backdrop">
+        <section
+          class="reopen-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="album-status-title">
+
+          <div class="dialog-icon">✓</div>
+
+          <h2 id="album-status-title">
+            {{
+              nextStatus === 'published'
+                ? 'Publicar álbum'
+                : nextStatus === 'draft'
+                  ? 'Volver a borrador'
+                  : 'Archivar álbum'
+            }}
+          </h2>
+
+          <p>
+            Vas a cambiar el estado del álbum
+            <strong>{{ a.title }}</strong>.
+          </p>
+
+          <div class="dialog-notice">
+            {{ getStatusDescription(nextStatus) }}
+          </div>
+
+          @if (statusError()) {
+            <div class="selection-alert error" role="alert">
+              {{ statusError() }}
+            </div>
+          }
+
+          <div class="dialog-actions">
+            <button
+              type="button"
+              class="cancel-button"
+              [disabled]="updatingStatus()"
+              (click)="cancelStatusChange()">
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="confirm-button"
+              [disabled]="updatingStatus()"
+              (click)="confirmStatusChange()">
+
+              {{
+                updatingStatus()
+                  ? 'Guardando...'
+                  : 'Confirmar cambio'
+              }}
+            </button>
+          </div>
+
+        </section>
+      </div>
+    }
+
+  }
+
+</section>

@@ -1,0 +1,296 @@
+
+<section class="albums-page">
+
+  <header class="page-header">
+
+    <div class="header-content">
+      <span class="eyebrow">
+        VYNTRA / ADMINISTRACIÓN
+      </span>
+
+      <h1>Álbumes fotográficos</h1>
+
+      <p>
+        Organiza, administra y comparte las
+        historias de tus clientes.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="create-button"
+      (click)="createAlbum()">
+      <span aria-hidden="true">+</span>
+      Crear álbum
+    </button>
+
+  </header>
+
+  <div class="stats-grid">
+
+    <article class="stat-card">
+      <span class="stat-label">
+        Total de álbumes
+      </span>
+
+      <strong class="stat-value">
+        {{ totalAlbums() }}
+      </strong>
+
+      <span class="stat-description">
+        Álbumes registrados
+      </span>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">
+        Publicados
+      </span>
+
+      <strong class="stat-value published-value">
+        {{ publishedAlbums() }}
+      </strong>
+
+      <span class="stat-description">
+        Disponibles para clientes
+      </span>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-label">
+        Borradores
+      </span>
+
+      <strong class="stat-value draft-value">
+        {{ draftAlbums() }}
+      </strong>
+
+      <span class="stat-description">
+        Pendientes de publicación
+      </span>
+    </article>
+
+  </div>
+
+  <div class="toolbar">
+
+    <div class="filter-bar">
+
+      <button
+        type="button"
+        [class.active]="selectedStatus() === 'all'"
+        (click)="setFilter('all')">
+        Todos
+      </button>
+
+      <button
+        type="button"
+        [class.active]="selectedStatus() === 'published'"
+        (click)="setFilter('published')">
+        Publicados
+      </button>
+
+      <button
+        type="button"
+        [class.active]="selectedStatus() === 'draft'"
+        (click)="setFilter('draft')">
+        Borradores
+      </button>
+
+      <button
+        type="button"
+        [class.active]="selectedStatus() === 'archived'"
+        (click)="setFilter('archived')">
+        Archivados
+      </button>
+
+    </div>
+
+    <div class="search-box">
+
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+
+      <input
+        type="search"
+        placeholder="Buscar álbum o cliente..."
+        aria-label="Buscar álbum o cliente"
+        [value]="searchTerm()"
+        (input)="updateSearch($any($event.target).value)"
+      />
+
+    </div>
+
+  </div>
+
+  @if (loading()) {
+
+    <div class="empty-state">
+      <div class="loading-spinner"></div>
+      <h2>Cargando álbumes...</h2>
+      <p>Estamos preparando tu biblioteca.</p>
+    </div>
+
+  } @else if (errorMessage()) {
+
+    <div class="empty-state">
+      <h2>No pudimos cargar los álbumes</h2>
+      <p>{{ errorMessage() }}</p>
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="loadData()">
+        Reintentar
+      </button>
+    </div>
+
+  } @else if (filteredAlbums().length === 0) {
+
+    <div class="empty-state">
+
+      <div class="empty-icon">
+        <svg
+          width="30"
+          height="30"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <path d="m21 15-5-5L5 21"/>
+        </svg>
+      </div>
+
+      @if (totalAlbums() === 0) {
+        <h2>Tu biblioteca comienza aquí</h2>
+        <p>
+          Crea tu primer álbum y empieza a
+          organizar los recuerdos de tus clientes.
+        </p>
+
+        <button
+          type="button"
+          class="create-button"
+          (click)="createAlbum()">
+          + Crear primer álbum
+        </button>
+      } @else {
+        <h2>No encontramos resultados</h2>
+        <p>
+          Prueba con otro nombre o cambia
+          los filtros de búsqueda.
+        </p>
+      }
+
+    </div>
+
+  } @else {
+
+    <div class="albums-grid">
+
+      @for (album of filteredAlbums(); track album.id) {
+
+        <article class="album-card">
+
+          <div class="album-cover">
+
+            <div class="cover-placeholder">
+              <svg
+                width="38"
+                height="38"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="3"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="m21 15-5-5L5 21"/>
+              </svg>
+
+              <span>VYNTRA GALLERY</span>
+            </div>
+
+            <span
+              class="album-status"
+              [class.status-published]="album.status === 'published'"
+              [class.status-draft]="album.status === 'draft'"
+              [class.status-archived]="album.status === 'archived'">
+
+              <span class="status-dot"></span>
+
+              {{ getStatusLabel(album.status) }}
+            </span>
+
+          </div>
+
+          <div class="album-content">
+
+            <span class="event-type">
+              {{ getEventLabel(album.event_type) }}
+            </span>
+
+            <h3>{{ album.title }}</h3>
+
+            <p class="client-name">
+              {{ getClientName(album.client_id) }}
+            </p>
+
+            <div class="album-meta">
+
+              <div>
+                <span>Fotografías incluidas</span>
+                <strong>
+                  {{ album.included_photos }}
+                </strong>
+              </div>
+
+              <div>
+                <span>Foto adicional</span>
+                <strong>
+                  {{ album.extra_photo_price.toLocaleString('es-CO') }}
+                  COP
+                </strong>
+              </div>
+
+            </div>
+
+            <button
+              type="button"
+              class="view-button"
+              (click)="viewAlbum(album.id)">
+
+              Administrar álbum
+
+              <span aria-hidden="true">→</span>
+            </button>
+
+          </div>
+
+        </article>
+
+      }
+
+    </div>
+
+  }
+
+</section>
