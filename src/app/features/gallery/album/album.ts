@@ -4,7 +4,9 @@ import {
   OnInit,
   inject,
   signal,
-  computed
+  computed,
+  HostListener,
+  OnDestroy
 } from '@angular/core';
 
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -179,7 +181,7 @@ const THEMES: Record<string, GalleryTheme> = {
   templateUrl: './album.html',
   styleUrl: './album.scss'
 })
-export class Album implements OnInit {
+export class Album implements OnInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -196,6 +198,25 @@ export class Album implements OnInit {
   actionError = signal('');
 
   selectedPhoto = signal<GalleryPhoto | null>(null);
+  private viewerHistoryEntry = false;
+  private touchStartX: number | null = null;
+  private touchStartY: number | null = null;
+
+  viewerIndex = computed(() =>
+    this.visiblePhotos().findIndex(photo => photo.id === this.selectedPhoto()?.id)
+  );
+
+  viewerTotal = computed(() =>
+    this.visiblePhotos().filter(photo => !!photo.previewUrl).length
+  );
+
+  viewerPosition = computed(() => {
+    const photo = this.selectedPhoto();
+    if (!photo) return 0;
+    return this.visiblePhotos()
+      .filter(item => !!item.previewUrl)
+      .findIndex(item => item.id === photo.id) + 1;
+  });
   activeFilter = signal('all');
 
   selectedIds = signal<Set<string>>(new Set());
@@ -531,10 +552,88 @@ export class Album implements OnInit {
   openPhoto(photo: GalleryPhoto): void {
     if (!photo.previewUrl) return;
     this.selectedPhoto.set(photo);
+    if (!this.viewerHistoryEntry) {
+      history.pushState({ vyntraPhotoViewer: true }, '');
+      this.viewerHistoryEntry = true;
+    }
   }
 
   closePhoto(): void {
     this.selectedPhoto.set(null);
+    if (this.viewerHistoryEntry) {
+      this.viewerHistoryEntry = false;
+      history.back();
+    }
+  }
+
+  @HostListener('window:popstate')
+  onViewerHistoryBack(): void {
+    if (this.viewerHistoryEntry) {
+      this.viewerHistoryEntry = false;
+      this.selectedPhoto.set(null);
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onViewerKeydown(event: KeyboardEvent): void {
+    if (!this.selectedPhoto()) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closePhoto();
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.nextPhoto();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.previousPhoto();
+    }
+  }
+
+  nextPhoto(): void {
+    this.movePhoto(1);
+  }
+
+  previousPhoto(): void {
+    this.movePhoto(-1);
+  }
+
+  private movePhoto(direction: number): void {
+    const current = this.selectedPhoto();
+    if (!current) return;
+    const available = this.visiblePhotos().filter(photo => !!photo.previewUrl);
+    if (available.length < 2) return;
+    const index = available.findIndex(photo => photo.id === current.id);
+    if (index < 0) return;
+    this.selectedPhoto.set(available[(index + direction + available.length) % available.length]);
+  }
+
+  onViewerTouchStart(event: TouchEvent): void {
+    if (event.touches.length !== 1) {
+      this.touchStartX = null;
+      this.touchStartY = null;
+      return;
+    }
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+  }
+
+  onViewerTouchEnd(event: TouchEvent): void {
+    if (this.touchStartX === null || this.touchStartY === null || event.changedTouches.length !== 1) return;
+    const dx = event.changedTouches[0].clientX - this.touchStartX;
+    const dy = event.changedTouches[0].clientY - this.touchStartY;
+    this.touchStartX = null;
+    this.touchStartY = null;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+      if (dx < 0) this.nextPhoto();
+      else this.previousPhoto();
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.viewerHistoryEntry) {
+      this.viewerHistoryEntry = false;
+      history.back();
+    }
   }
 
   getEventLabel(type: string): string {

@@ -1,4 +1,3 @@
-
 <section class="album-detail-page">
 
   <a routerLink="/admin/albums" class="back-link">
@@ -867,33 +866,37 @@
 
     </section>
 
-    <!-- VISUALIZADOR DE FOTOGRAFÍAS -->
-
+    <!-- VISUALIZADOR DE FOTOGRAFÍAS: teclado, táctil e historial -->
     @if (selectedPreview(); as photo) {
-      <div
-        class="photo-lightbox"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Vista previa de fotografía">
+      <div class="photo-lightbox" role="dialog" aria-modal="true"
+           aria-label="Vista previa de fotografía"
+           (touchstart)="onPreviewTouchStart($event)"
+           (touchend)="onPreviewTouchEnd($event)">
 
         <div class="photo-lightbox-header">
-          <span>{{ photo.file_name }}</span>
-
-          <button
-            type="button"
-            (click)="closePhoto()"
-            aria-label="Cerrar fotografía">
-            ✕
-          </button>
+          <span class="photo-lightbox-filename" [title]="photo.file_name">{{ photo.file_name }}</span>
+          <div class="photo-lightbox-header-actions">
+            <span class="photo-lightbox-counter">{{ previewPosition() }} / {{ previewTotal() }}</span>
+            <button type="button" class="photo-lightbox-close" (click)="closePhoto()"
+                    aria-label="Cerrar fotografía">✕</button>
+          </div>
         </div>
 
-        @if (photo.previewUrl) {
-          <img
-            [src]="photo.previewUrl"
-            [alt]="photo.file_name">
-        }
+        <div class="photo-lightbox-stage">
+          <button type="button" class="photo-lightbox-arrow previous"
+                  (click)="showPreviousPhoto()" [disabled]="previewTotal() < 2"
+                  aria-label="Fotografía anterior">‹</button>
 
-        <p>Vista previa de Vyntra Gallery</p>
+          @if (photo.previewUrl) {
+            <img [src]="photo.previewUrl" [alt]="photo.file_name" draggable="false">
+          }
+
+          <button type="button" class="photo-lightbox-arrow next"
+                  (click)="showNextPhoto()" [disabled]="previewTotal() < 2"
+                  aria-label="Fotografía siguiente">›</button>
+        </div>
+
+        <p class="photo-lightbox-hint">Desliza para cambiar de fotografía · Vista previa de Vyntra Gallery</p>
       </div>
     }
 

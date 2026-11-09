@@ -1,6 +1,4 @@
-
-
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, inject, signal, computed } from '@angular/core';
 
 import { DecimalPipe } from '@angular/common';
 
@@ -12,15 +10,11 @@ import {
 
 } from '../../../core/services/album';
 
-
-
 import {
 
   SelectionService, AlbumSelectionControl
 
 } from '../../../core/services/selection';
-
-
 
 import {
 
@@ -28,23 +22,17 @@ import {
 
 } from '../../../core/services/photos';
 
-
-
 import {
 
   PhotoProcessorService
 
 } from '../../../core/services/photo-processor';
 
-
-
 interface GalleryPhoto extends VyntraPhoto {
 
   previewUrl: string | null;
 
 }
-
-
 
 @Component({
 
@@ -60,7 +48,7 @@ interface GalleryPhoto extends VyntraPhoto {
 
 })
 
-export class AlbumDetail implements OnInit {
+export class AlbumDetail implements OnInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
 
@@ -73,113 +61,204 @@ export class AlbumDetail implements OnInit {
   private photoProcessor = inject(PhotoProcessorService);
 
   // Edición del álbum: se mantiene separada del registro guardado.
+
   editingAlbum = signal(false);
+
   savingAlbum = signal(false);
+
   editError = signal('');
+
   editSuccess = signal('');
+
   editForm = signal<{
+
     title: string;
+
     event_type: EventType;
+
     event_date: string;
+
     description: string;
+
     included_photos: number;
+
     extra_photo_price: number;
+
     allow_extra_photos: boolean;
+
     watermark_enabled: boolean;
+
     allow_downloads: boolean;
+
   }>({
+
     title: '', event_type: 'other', event_date: '', description: '',
+
     included_photos: 0, extra_photo_price: 0, allow_extra_photos: true,
+
     watermark_enabled: true, allow_downloads: false
+
   });
 
   beginAlbumEdit(): void {
+
     const a = this.album();
+
     if (!a || this.savingAlbum()) return;
+
     this.editForm.set({
+
       title: a.title,
+
       event_type: a.event_type,
+
       event_date: a.event_date ?? '',
+
       description: a.description ?? '',
+
       included_photos: a.included_photos,
+
       extra_photo_price: a.extra_photo_price,
+
       allow_extra_photos: a.allow_extra_photos,
+
       watermark_enabled: a.watermark_enabled,
+
       allow_downloads: a.allow_downloads
+
     });
+
     this.editError.set('');
+
     this.editSuccess.set('');
+
     this.editingAlbum.set(true);
+
   }
 
   changeAlbumField(field: keyof ReturnType<typeof this.editForm>, event: Event): void {
+
     const input = event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
     const value = input instanceof HTMLInputElement && input.type === 'checkbox'
+
       ? input.checked
+
       : input instanceof HTMLInputElement && input.type === 'number'
+
         ? input.valueAsNumber
+
         : input.value;
+
     this.editForm.update(current => ({ ...current, [field]: value }));
+
   }
 
   cancelAlbumEdit(): void {
+
     if (this.savingAlbum()) return;
+
     this.editingAlbum.set(false);
+
     this.editError.set('');
+
   }
 
   async saveAlbumEdit(): Promise<void> {
+
     const a = this.album();
+
     if (!a || !this.editingAlbum() || this.savingAlbum()) return;
+
     const form = this.editForm();
+
     const title = form.title.trim();
+
     const included = form.included_photos;
+
     const price = form.extra_photo_price;
+
     if (!title) {
+
       this.editError.set('El nombre del álbum es obligatorio.');
+
       return;
+
     }
+
     if (!Number.isSafeInteger(included) || included < 0 ||
+
         !Number.isSafeInteger(price) || price < 0) {
+
       this.editError.set('Las cantidades y precios deben ser números enteros iguales o mayores que cero.');
+
       return;
+
     }
+
     if (this.selectionClosed() && included < this.selectedPhotoCount()) {
+
       this.editError.set('No puedes reducir las fotografías incluidas por debajo de la selección confirmada del cliente.');
+
       return;
+
     }
+
     this.savingAlbum.set(true);
+
     this.editError.set('');
+
     this.editSuccess.set('');
+
     try {
+
       const changes: UpdateAlbumDto = {
+
         title,
+
         event_type: form.event_type,
+
         event_date: form.event_date || null,
+
         description: form.description.trim() || null,
+
         included_photos: included,
+
         extra_photo_price: price,
+
         allow_extra_photos: form.allow_extra_photos,
+
         watermark_enabled: form.watermark_enabled,
+
         allow_downloads: form.allow_downloads
+
       };
+
       const updated = await this.albumsService.updateAlbum(a.id, changes);
+
       this.album.set(updated);
+
       this.editingAlbum.set(false);
+
       this.editSuccess.set('Información del álbum actualizada correctamente.');
+
     } catch (error) {
+
       console.error('Error guardando información del álbum:', error);
+
       this.editError.set(error instanceof Error ? error.message : 'No se pudieron guardar los cambios.');
+
     } finally {
+
       this.savingAlbum.set(false);
+
     }
+
   }
 
   album = signal<VyntraAlbum | null>(null);
 
   selectionControl = signal<AlbumSelectionControl | null>(null);
-
-
 
   loading = signal(true);
 
@@ -189,8 +268,6 @@ export class AlbumDetail implements OnInit {
 
   favoritesLoaded = signal(false);
 
-
-
   errorMessage = signal('');
 
   selectionError = signal('');
@@ -199,13 +276,9 @@ export class AlbumDetail implements OnInit {
 
   successMessage = signal('');
 
-
-
   reopening = signal(false);
 
   showReopenConfirm = signal(false);
-
-
 
   updatingStatus = signal(false);
 
@@ -215,13 +288,9 @@ export class AlbumDetail implements OnInit {
 
   pendingStatus = signal<AlbumStatus | null>(null);
 
-
-
   photos = signal<GalleryPhoto[]>([]);
 
   selectedPhotoIds = signal<Set<string>>(new Set());
-
-
 
   loadingPhotos = signal(false);
 
@@ -235,10 +304,16 @@ export class AlbumDetail implements OnInit {
 
   uploadCompleted = signal(0);
 
-
-
   selectedPreview = signal<GalleryPhoto | null>(null);
 
+  // Navegación del visor administrativo.
+  previewIndex = computed(() => this.photos().findIndex(p => p.id === this.selectedPreview()?.id));
+  previewPosition = computed(() => this.photos().filter(p => !!p.previewUrl).findIndex(p => p.id === this.selectedPreview()?.id) + 1);
+  previewTotal = computed(() => this.photos().filter(p => !!p.previewUrl).length);
+  private readonly lightboxHistoryKey = '__vyntraAdminPhotoViewer';
+  private touchStartX: number | null = null;
+  private touchStartY: number | null = null;
+  private previousBodyOverflow: string | null = null;
 
 
   deletingPhoto = signal(false);
@@ -251,8 +326,6 @@ export class AlbumDetail implements OnInit {
 
   deleteSuccess = signal('');
 
-
-
   cleaningAlbum = signal(false);
 
   showCleanupConfirm = signal(false);
@@ -263,11 +336,7 @@ export class AlbumDetail implements OnInit {
 
   cleanupSuccess = signal('');
 
-
-
   photoCount = computed(() => this.photos().length);
-
-
 
   selectedPhotoCount = computed(() =>
 
@@ -275,15 +344,11 @@ export class AlbumDetail implements OnInit {
 
   );
 
-
-
   unselectedPhotoCount = computed(() =>
 
     Math.max(0, this.photoCount() - this.selectedPhotoCount())
 
   );
-
-
 
   extraPhotoCount = computed(() =>
 
@@ -299,8 +364,6 @@ export class AlbumDetail implements OnInit {
 
   );
 
-
-
   extraPhotoTotal = computed(() =>
 
     this.extraPhotoCount() *
@@ -309,15 +372,11 @@ export class AlbumDetail implements OnInit {
 
   );
 
-
-
   // ==========================================
 
   // LIMPIEZA DE FOTOGRAFÍAS NO SELECCIONADAS
 
   // ==========================================
-
-
 
   openCleanupConfirmation(): void {
 
@@ -339,8 +398,6 @@ export class AlbumDetail implements OnInit {
 
     }
 
-
-
     this.cleanupError.set('');
 
     this.cleanupSuccess.set('');
@@ -348,8 +405,6 @@ export class AlbumDetail implements OnInit {
     this.showCleanupConfirm.set(true);
 
   }
-
-
 
   closeCleanupConfirmation(): void {
 
@@ -359,13 +414,9 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   async confirmCleanup(): Promise<void> {
 
     const currentAlbum = this.album();
-
-
 
     if (
 
@@ -383,8 +434,6 @@ export class AlbumDetail implements OnInit {
 
     }
 
-
-
     this.cleaningAlbum.set(true);
 
     this.cleanupCompleted.set(0);
@@ -392,8 +441,6 @@ export class AlbumDetail implements OnInit {
     this.cleanupError.set('');
 
     this.cleanupSuccess.set('');
-
-
 
     try {
 
@@ -411,8 +458,6 @@ export class AlbumDetail implements OnInit {
 
         );
 
-
-
       await Promise.all([
 
         this.loadPhotos(currentAlbum.id),
@@ -423,11 +468,7 @@ export class AlbumDetail implements OnInit {
 
       ]);
 
-
-
       this.showCleanupConfirm.set(false);
-
-
 
       if (result.failed > 0) {
 
@@ -453,13 +494,9 @@ export class AlbumDetail implements OnInit {
 
       }
 
-
-
     } catch (error) {
 
       console.error('Error limpiando álbum:', error);
-
-
 
       this.cleanupError.set(
 
@@ -471,11 +508,7 @@ export class AlbumDetail implements OnInit {
 
       );
 
-
-
       await this.loadPhotos(currentAlbum.id);
-
-
 
     } finally {
 
@@ -484,8 +517,6 @@ export class AlbumDetail implements OnInit {
     }
 
   }
-
-
 
   uploadProgress = computed(() => {
 
@@ -499,23 +530,17 @@ export class AlbumDetail implements OnInit {
 
   });
 
-
-
   selectionClosed = computed(() =>
 
     this.selectionControl()?.selection_status === 'closed'
 
   );
 
-
-
   reopenUsed = computed(() =>
 
     this.selectionControl()?.reopen_used ?? false
 
   );
-
-
 
   canReopen = computed(() => {
 
@@ -529,15 +554,11 @@ export class AlbumDetail implements OnInit {
 
   });
 
-
-
   isClientSelected(photoId: string): boolean {
 
     return this.selectedPhotoIds().has(photoId);
 
   }
-
-
 
   get showSelectionResults(): boolean {
 
@@ -551,13 +572,9 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   async ngOnInit(): Promise<void> {
 
     const id = this.route.snapshot.paramMap.get('id');
-
-
 
     if (!id) {
 
@@ -569,13 +586,9 @@ export class AlbumDetail implements OnInit {
 
     }
 
-
-
     try {
 
       const result = await this.albumsService.getAlbumById(id);
-
-
 
       if (!result) {
 
@@ -585,11 +598,7 @@ export class AlbumDetail implements OnInit {
 
       }
 
-
-
       this.album.set(result);
-
-
 
       await Promise.all([
 
@@ -615,25 +624,17 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   // ESTADO DEL ÁLBUM
-
-
 
   requestStatusChange(status: AlbumStatus): void {
 
     const current = this.album();
-
-
 
     if (!current || current.status === status || this.updatingStatus()) {
 
       return;
 
     }
-
-
 
     this.statusError.set('');
 
@@ -643,15 +644,11 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   cancelStatusChange(): void {
 
     if (!this.updatingStatus()) this.pendingStatus.set(null);
 
   }
-
-
 
   async confirmStatusChange(): Promise<void> {
 
@@ -659,19 +656,13 @@ export class AlbumDetail implements OnInit {
 
     const nextStatus = this.pendingStatus();
 
-
-
     if (!current || !nextStatus || this.updatingStatus()) return;
-
-
 
     this.updatingStatus.set(true);
 
     this.statusError.set('');
 
     this.statusSuccess.set('');
-
-
 
     try {
 
@@ -683,13 +674,9 @@ export class AlbumDetail implements OnInit {
 
       );
 
-
-
       this.album.set(updated);
 
       this.pendingStatus.set(null);
-
-
 
       const messages: Record<AlbumStatus, string> = {
 
@@ -700,8 +687,6 @@ export class AlbumDetail implements OnInit {
         archived: 'El álbum fue archivado correctamente.'
 
       };
-
-
 
       this.statusSuccess.set(messages[nextStatus]);
 
@@ -727,8 +712,6 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   getStatusDescription(status: AlbumStatus): string {
 
     const descriptions: Record<AlbumStatus, string> = {
@@ -741,17 +724,11 @@ export class AlbumDetail implements OnInit {
 
     };
 
-
-
     return descriptions[status];
 
   }
 
-
-
   // FOTOGRAFÍAS
-
-
 
   async loadPhotos(albumId: string): Promise<void> {
 
@@ -759,21 +736,15 @@ export class AlbumDetail implements OnInit {
 
     this.uploadError.set('');
 
-
-
     try {
 
       const records = await this.photosService.getPhotos(albumId);
-
-
 
       const gallery = await Promise.all(
 
         records.map(async photo => {
 
           let previewUrl: string | null = null;
-
-
 
           if (photo.preview_path) {
 
@@ -793,15 +764,11 @@ export class AlbumDetail implements OnInit {
 
           }
 
-
-
           return { ...photo, previewUrl };
 
         })
 
       );
-
-
 
       this.photos.set(gallery);
 
@@ -823,12 +790,6 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
-
-
-
-
   async onFilesSelected(event: Event): Promise<void> {
 
     const input = event.target as HTMLInputElement;
@@ -837,8 +798,6 @@ export class AlbumDetail implements OnInit {
 
     const currentAlbum = this.album();
 
-
-
     if (!currentAlbum || this.uploading() || files.length === 0) {
 
       input.value = '';
@@ -846,8 +805,6 @@ export class AlbumDetail implements OnInit {
       return;
 
     }
-
-
 
     const MAX_FILE_SIZE = 150 * 1024 * 1024;
 
@@ -863,13 +820,9 @@ export class AlbumDetail implements OnInit {
 
     };
 
-
-
     this.uploadError.set('');
 
     this.uploadSuccess.set('');
-
-
 
     const validFiles = files.filter(file =>
 
@@ -883,8 +836,6 @@ export class AlbumDetail implements OnInit {
 
     const skipped = files.length - validFiles.length;
 
-
-
     if (validFiles.length === 0) {
 
       this.uploadError.set('Selecciona fotografías JPG, PNG o WebP de hasta 150 MB. Los archivos RAW no son compatibles.');
@@ -895,15 +846,11 @@ export class AlbumDetail implements OnInit {
 
     }
 
-
-
     this.uploading.set(true);
 
     this.uploadTotal.set(validFiles.length);
 
     this.uploadCompleted.set(0);
-
-
 
     let successful = 0;
 
@@ -911,15 +858,11 @@ export class AlbumDetail implements OnInit {
 
     let nextIndex = 0;
 
-
-
     const processOne = async (file: File): Promise<void> => {
 
       let originalPath: string | null = null;
 
       let previewPath: string | null = null;
-
-
 
       try {
 
@@ -931,8 +874,6 @@ export class AlbumDetail implements OnInit {
 
         );
 
-
-
         originalPath = await this.photosService.uploadOriginal(
 
           currentAlbum.id,
@@ -941,8 +882,6 @@ export class AlbumDetail implements OnInit {
 
         );
 
-
-
         previewPath = await this.photosService.uploadPreview(
 
           currentAlbum.id,
@@ -950,8 +889,6 @@ export class AlbumDetail implements OnInit {
           processed.preview
 
         );
-
-
 
         await this.photosService.createPhoto({
 
@@ -973,8 +910,6 @@ export class AlbumDetail implements OnInit {
 
         });
 
-
-
         successful++;
 
       } catch (error) {
@@ -984,8 +919,6 @@ export class AlbumDetail implements OnInit {
         const detail = error instanceof Error ? error.message : 'Error desconocido.';
 
         failedFiles.push(`${file.name}: ${detail}`);
-
-
 
         if (originalPath || previewPath) {
 
@@ -1015,8 +948,6 @@ export class AlbumDetail implements OnInit {
 
     };
 
-
-
     const worker = async (): Promise<void> => {
 
       while (nextIndex < validFiles.length) {
@@ -1029,8 +960,6 @@ export class AlbumDetail implements OnInit {
 
     };
 
-
-
     try {
 
       const workerCount = Math.min(CONCURRENCY, validFiles.length);
@@ -1039,15 +968,11 @@ export class AlbumDetail implements OnInit {
 
       await this.loadPhotos(currentAlbum.id);
 
-
-
       if (successful > 0) {
 
         this.uploadSuccess.set(`${successful} fotografía(s) cargada(s) correctamente.`);
 
       }
-
-
 
       const errors: string[] = [];
 
@@ -1081,33 +1006,106 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   openPhoto(photo: GalleryPhoto): void {
-
-    if (photo.previewUrl) this.selectedPreview.set(photo);
-
+    if (!photo.previewUrl) return;
+    if (!this.selectedPreview()) {
+      // Una entrada de historial permite cerrar el visor con Atrás en el celular.
+      history.pushState({ ...history.state, [this.lightboxHistoryKey]: this.album()?.id }, '');
+      this.lockPageScroll();
+    }
+    this.selectedPreview.set(photo);
   }
-
-
 
   closePhoto(): void {
-
+    if (!this.selectedPreview()) return;
     this.selectedPreview.set(null);
-
+    this.unlockPageScroll();
+    // Retirar solamente la entrada que agregó el visor.
+    if (history.state?.[this.lightboxHistoryKey] === this.album()?.id) {
+      history.back();
+    }
   }
 
+  showPreviousPhoto(): void {
+    this.movePreview(-1);
+  }
 
+  showNextPhoto(): void {
+    this.movePreview(1);
+  }
+
+  private movePreview(direction: -1 | 1): void {
+    const items = this.photos().filter(photo => !!photo.previewUrl);
+    const current = this.selectedPreview();
+    if (!current || items.length < 2) return;
+    const index = items.findIndex(photo => photo.id === current.id);
+    if (index < 0) return;
+    this.selectedPreview.set(items[(index + direction + items.length) % items.length]);
+  }
+
+  onPreviewTouchStart(event: TouchEvent): void {
+    if (event.touches.length !== 1) return;
+    this.touchStartX = event.touches[0].clientX;
+    this.touchStartY = event.touches[0].clientY;
+  }
+
+  onPreviewTouchEnd(event: TouchEvent): void {
+    if (this.touchStartX === null || this.touchStartY === null || !event.changedTouches.length) return;
+    const deltaX = event.changedTouches[0].clientX - this.touchStartX;
+    const deltaY = event.changedTouches[0].clientY - this.touchStartY;
+    this.touchStartX = null;
+    this.touchStartY = null;
+    if (Math.abs(deltaX) < 55 || Math.abs(deltaX) <= Math.abs(deltaY) * 1.3) return;
+    if (deltaX < 0) this.showNextPhoto();
+    else this.showPreviousPhoto();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onPreviewKeydown(event: KeyboardEvent): void {
+    if (!this.selectedPreview()) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closePhoto();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.showPreviousPhoto();
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.showNextPhoto();
+    }
+  }
+
+  @HostListener('window:popstate')
+  onPreviewPopstate(): void {
+    if (this.selectedPreview()) {
+      this.selectedPreview.set(null);
+      this.unlockPageScroll();
+    }
+  }
+
+  private lockPageScroll(): void {
+    if (this.previousBodyOverflow === null) {
+      this.previousBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  private unlockPageScroll(): void {
+    if (this.previousBodyOverflow !== null) {
+      document.body.style.overflow = this.previousBodyOverflow;
+      this.previousBodyOverflow = null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.unlockPageScroll();
+  }
 
   // ELIMINACIÓN
-
-
 
   openDeleteConfirmation(photo: GalleryPhoto): void {
 
     if (this.deletingPhoto()) return;
-
-
 
     this.photoToDelete.set(photo);
 
@@ -1119,13 +1117,9 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   closeDeleteConfirmation(): void {
 
     if (this.deletingPhoto()) return;
-
-
 
     this.showDeleteConfirm.set(false);
 
@@ -1133,19 +1127,13 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   async confirmDeletePhoto(): Promise<void> {
 
     const currentAlbum = this.album();
 
     const photo = this.photoToDelete();
 
-
-
     if (!currentAlbum || !photo || this.deletingPhoto()) return;
-
-
 
     this.deletingPhoto.set(true);
 
@@ -1153,21 +1141,15 @@ export class AlbumDetail implements OnInit {
 
     this.deleteSuccess.set('');
 
-
-
     try {
 
       await this.photosService.deletePhoto(currentAlbum.id, photo.id);
-
-
 
       this.photos.update(current =>
 
         current.filter(item => item.id !== photo.id)
 
       );
-
-
 
       this.selectedPhotoIds.update(current => {
 
@@ -1179,15 +1161,11 @@ export class AlbumDetail implements OnInit {
 
       });
 
-
-
       if (this.selectedPreview()?.id === photo.id) {
 
         this.selectedPreview.set(null);
 
       }
-
-
 
       this.showDeleteConfirm.set(false);
 
@@ -1217,11 +1195,7 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   // SELECCIÓN OFICIAL DEL CLIENTE
-
-
 
   async loadClientFavorites(albumId: string): Promise<void> {
 
@@ -1231,23 +1205,17 @@ export class AlbumDetail implements OnInit {
 
     this.favoritesError.set('');
 
-
-
     try {
 
       const selections =
 
         await this.selectionService.getPhotoSelections(albumId);
 
-
-
       this.selectedPhotoIds.set(
 
         new Set(selections.map(item => item.photo_id))
 
       );
-
-
 
       this.favoritesLoaded.set(true);
 
@@ -1271,8 +1239,6 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   async refreshClientSelection(): Promise<void> {
 
     const current = this.album();
@@ -1282,8 +1248,6 @@ export class AlbumDetail implements OnInit {
       return;
 
     }
-
-
 
     await Promise.all([
 
@@ -1295,15 +1259,11 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   async loadSelectionControl(albumId: string): Promise<void> {
 
     this.loadingSelection.set(true);
 
     this.selectionError.set('');
-
-
 
     try {
 
@@ -1311,11 +1271,7 @@ export class AlbumDetail implements OnInit {
 
         await this.selectionService.getSelectionControl(albumId);
 
-
-
       this.selectionControl.set(control);
-
-
 
       if (!control) {
 
@@ -1347,13 +1303,9 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   openReopenConfirmation(): void {
 
     if (!this.canReopen()) return;
-
-
 
     this.successMessage.set('');
 
@@ -1363,25 +1315,17 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   closeReopenConfirmation(): void {
 
     if (!this.reopening()) this.showReopenConfirm.set(false);
 
   }
 
-
-
   async confirmReopen(): Promise<void> {
 
     const currentAlbum = this.album();
 
-
-
     if (!currentAlbum || !this.canReopen() || this.reopening()) return;
-
-
 
     this.reopening.set(true);
 
@@ -1389,21 +1333,15 @@ export class AlbumDetail implements OnInit {
 
     this.successMessage.set('');
 
-
-
     try {
 
       const updatedControl =
 
         await this.selectionService.reopenSelection(currentAlbum.id);
 
-
-
       this.selectionControl.set(updatedControl);
 
       this.showReopenConfirm.set(false);
-
-
 
       if (
 
@@ -1429,8 +1367,6 @@ export class AlbumDetail implements OnInit {
 
       }
 
-
-
       await this.loadClientFavorites(currentAlbum.id);
 
     } catch (error) {
@@ -1451,11 +1387,7 @@ export class AlbumDetail implements OnInit {
 
   }
 
-
-
   // ETIQUETAS
-
-
 
   getEventLabel(type: string): string {
 
@@ -1479,13 +1411,9 @@ export class AlbumDetail implements OnInit {
 
     };
 
-
-
     return labels[type] ?? 'Evento';
 
   }
-
-
 
   getStatusLabel(status: string): string {
 
@@ -1499,25 +1427,17 @@ export class AlbumDetail implements OnInit {
 
     };
 
-
-
     return labels[status] ?? status;
 
   }
-
-
 
   formatDate(date: string | null): string {
 
     if (!date) return 'No disponible';
 
-
-
     const parsedDate = new Date(date);
 
     if (Number.isNaN(parsedDate.getTime())) return 'Fecha no válida';
-
-
 
     return new Intl.DateTimeFormat('es-CO', {
 

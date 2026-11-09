@@ -457,7 +457,9 @@
       class="photo-viewer"
       role="dialog"
       aria-modal="true"
-      aria-label="Visualizador de fotografía">
+      aria-label="Visualizador de fotografía"
+      (touchstart)="onViewerTouchStart($event)"
+      (touchend)="onViewerTouchEnd($event)">
 
       <button
         type="button"
@@ -467,11 +469,28 @@
         ✕
       </button>
 
+      <div class="viewer-top-counter" aria-live="polite">
+        {{ viewerPosition() }} / {{ viewerTotal() }}
+      </div>
+
+      <button type="button" class="viewer-arrow viewer-arrow-prev"
+        [disabled]="viewerTotal() < 2"
+        (click)="previousPhoto()" aria-label="Fotografía anterior">
+        <span aria-hidden="true">‹</span>
+      </button>
+
       @if (photo.previewUrl) {
-        <img
+        <img class="viewer-image"
           [src]="photo.previewUrl"
-          [alt]="photo.file_name">
+          [alt]="photo.file_name"
+          draggable="false">
       }
+
+      <button type="button" class="viewer-arrow viewer-arrow-next"
+        [disabled]="viewerTotal() < 2"
+        (click)="nextPhoto()" aria-label="Fotografía siguiente">
+        <span aria-hidden="true">›</span>
+      </button>
 
       @if (!isAdminPreview() && selectionReady()) {
 
