@@ -636,18 +636,21 @@ export class Album implements OnInit, OnDestroy {
     }
   }
 
-  getEventLabel(type: string): string {
-    const labels: Record<string, string> = {
-      wedding: 'Nuestra boda',
-      quinceanera: 'Mis quince años',
-      birthday: 'Nuestro cumpleaños',
-      baptism: 'Nuestro bautizo',
-      first_communion: 'Nuestra primera comunión',
-      graduation: 'Nuestra graduación',
-      corporate: 'Nuestro evento',
-      other: 'Nuestro evento'
-    };
+ 
+getEventLabel(type: string): string {
 
-    return labels[type] ?? 'Nuestro evento';
-  }
+  const labels: Record<string, string> = {
+    wedding: 'Nuestra boda',
+    quinceanera: 'Mis quince años',
+    birthday: 'Nuestro cumpleaños',
+    baptism: 'Nuestro bautizo',
+    first_communion: 'Nuestra primera comunión',
+    graduation: 'Nuestra graduación',
+    corporate: 'Nuestro evento',
+    other: ''
+  };
+
+  return labels[type] ?? '';
+}
+
 }

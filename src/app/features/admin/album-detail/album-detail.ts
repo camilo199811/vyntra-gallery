@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, HostListener, inject, signal, computed } 
 
 import { DecimalPipe } from '@angular/common';
 
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import {
 
@@ -51,7 +51,7 @@ interface GalleryPhoto extends VyntraPhoto {
 export class AlbumDetail implements OnInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
-
+private router = inject(Router);
   private albumsService = inject(AlbumsService);
 
   private selectionService = inject(SelectionService);
@@ -69,7 +69,9 @@ export class AlbumDetail implements OnInit, OnDestroy {
   editError = signal('');
 
   editSuccess = signal('');
-
+showAlbumDeleteConfirm = signal(false);
+deletingAlbum = signal(false);
+albumDeleteError = signal('');
   editForm = signal<{
 
     title: string;
@@ -1455,6 +1457,69 @@ export class AlbumDetail implements OnInit, OnDestroy {
 
     }).format(parsedDate);
 
+  }
+
+  // ==========================================
+  // ELIMINACIÓN COMPLETA DEL ÁLBUM
+  // ==========================================
+
+  openAlbumDeleteConfirmation(): void {
+    if (
+      !this.album() ||
+      this.deletingAlbum() ||
+      this.uploading() ||
+      this.cleaningAlbum() ||
+      this.deletingPhoto()
+    ) {
+      return;
+    }
+
+    this.albumDeleteError.set('');
+    this.showAlbumDeleteConfirm.set(true);
+  }
+
+  closeAlbumDeleteConfirmation(): void {
+    if (this.deletingAlbum()) return;
+
+    this.showAlbumDeleteConfirm.set(false);
+    this.albumDeleteError.set('');
+  }
+
+  async confirmAlbumDeletion(): Promise<void> {
+    const currentAlbum = this.album();
+
+    if (
+      !currentAlbum ||
+      !this.showAlbumDeleteConfirm() ||
+      this.deletingAlbum()
+    ) {
+      return;
+    }
+
+    this.deletingAlbum.set(true);
+    this.albumDeleteError.set('');
+
+    try {
+      // Esta operación debe eliminar el álbum
+      // y sus dependencias de forma segura.
+      await this.albumsService.deleteAlbum(currentAlbum.id);
+
+      this.showAlbumDeleteConfirm.set(false);
+
+      await this.router.navigateByUrl('/admin/albums');
+
+    } catch (error) {
+      console.error('Error eliminando álbum:', error);
+
+      this.albumDeleteError.set(
+        error instanceof Error
+          ? error.message
+          : 'No fue posible eliminar el álbum.'
+      );
+
+    } finally {
+      this.deletingAlbum.set(false);
+    }
   }
 
 }

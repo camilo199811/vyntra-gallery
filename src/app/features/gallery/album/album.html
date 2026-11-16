@@ -61,7 +61,7 @@
                 </span>
               </div>
             }
-
+@if (a.event_type !== 'other') {
             <div class="hero-detail">
               <span class="detail-icon" aria-hidden="true">
                   @switch (a.event_type) {
@@ -86,9 +86,7 @@
                     @case ('corporate') {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13c5 3 13 3 18 0M12 13v3"/></svg>
                     }
-                    @case ('other') {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3ZM19 17l.7 1.3L21 19l-1.3.7L19 21l-.7-1.3L17 19l1.3-.7L19 17Z"/></svg>
-                    }
+                    
                     @default {
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
                     }
@@ -98,7 +96,7 @@
                 {{ getEventLabel(a.event_type) }}
               </span>
             </div>
-
+}
           </div>
 
         </div>

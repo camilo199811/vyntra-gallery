@@ -1,18 +1,23 @@
 
 import { Routes } from '@angular/router';
+
 import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
 
-  // ========================================
-  // INICIO Y AUTENTICACIÓN
-  // ========================================
+  // ======================================
+  // INICIO
+  // ======================================
 
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
   },
+
+  // ======================================
+  // INICIO DE SESIÓN
+  // ======================================
 
   {
     path: 'login',
@@ -21,9 +26,9 @@ export const routes: Routes = [
         .then(m => m.Login)
   },
 
-  // ========================================
-  // PANEL ADMINISTRATIVO
-  // ========================================
+  // ======================================
+  // ADMINISTRACIÓN
+  // ======================================
 
   {
     path: 'admin',
@@ -86,13 +91,12 @@ export const routes: Routes = [
     ]
   },
 
-  // ========================================
-  // VISTA PREVIA DEL ADMINISTRADOR
-  // ========================================
+  // ======================================
+  // VISTA PREVIA ADMINISTRATIVA
+  // ======================================
 
   {
     path: 'admin-preview/:id',
-
     canActivate: [adminGuard],
 
     loadComponent: () =>
@@ -100,9 +104,6 @@ export const routes: Routes = [
         .then(m => m.ClientLayout),
 
     children: [
-
-      // Al abrir la vista previa, entrar
-      // directamente a la galería.
 
       {
         path: '',
@@ -127,9 +128,21 @@ export const routes: Routes = [
     ]
   },
 
-  // ========================================
+  // ======================================
+  // MIS ÁLBUMES - NUEVA PANTALLA
+  // ======================================
+
+  {
+    path: 'my-albums',
+
+    loadComponent: () =>
+      import('./features/gallery/my-albums/my-albums')
+        .then(m => m.MyAlbums)
+  },
+
+  // ======================================
   // GALERÍA DEL CLIENTE
-  // ========================================
+  // ======================================
 
   {
     path: 'gallery/:slug',
@@ -140,14 +153,12 @@ export const routes: Routes = [
 
     children: [
 
-      
-{
-  path: '',
-  loadComponent: () =>
-    import('./features/gallery/event-details/event-details')
-      .then(m => m.EventDetails)
-},
-
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/gallery/event-details/event-details')
+            .then(m => m.EventDetails)
+      },
 
       {
         path: 'album',
@@ -166,9 +177,9 @@ export const routes: Routes = [
     ]
   },
 
-  // ========================================
-  // RUTA NO ENCONTRADA
-  // ========================================
+  // ======================================
+  // RUTAS NO ENCONTRADAS
+  // ======================================
 
   {
     path: '**',

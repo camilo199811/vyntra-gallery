@@ -33,6 +33,7 @@ export interface VyntraAlbum {
   status: AlbumStatus;
   created_at: string;
   updated_at: string;
+  custom_event_name: string | null;
 }
 
 export interface CreateAlbumDto {
@@ -47,6 +48,7 @@ export interface CreateAlbumDto {
   watermark_enabled: boolean;
   allow_downloads: boolean;
   status: AlbumStatus;
+  custom_event_name: string | null;
 }
 
 export type UpdateAlbumDto =
@@ -156,16 +158,60 @@ export class AlbumsService {
     return data as VyntraAlbum;
   }
 
-  async deleteAlbum(
-    id: string
-  ): Promise<void> {
+  
+async deleteAlbum(
+  id: string
+): Promise<void> {
 
-    const { error } =
-      await this.supabase.client
-        .from('albums')
-        .delete()
-        .eq('id', id);
+  const { data: sessionData, error: sessionError } =
+    await this.supabase.client.auth.getSession();
 
-    if (error) throw error;
+  if (sessionError) throw sessionError;
+
+  if (!sessionData.session) {
+    throw new Error(
+      'Tu sesión ha vencido. Inicia sesión nuevamente.'
+    );
   }
+
+  const { data, error } =
+    await this.supabase.client.functions.invoke<{
+      success?: boolean;
+      message?: string;
+      error?: string;
+      warning?: string;
+    }>('delete-album', {
+      body: {
+        album_id: id
+      }
+    });
+
+  if (error) {
+    const context = error as {
+      context?: Response;
+    };
+
+    let message = error.message;
+
+    if (context.context) {
+      try {
+        const details = await context.context.json();
+
+        message = details.error || message;
+      } catch {
+        // Mantener el mensaje original.
+      }
+    }
+
+    throw new Error(message);
+  }
+
+  if (!data?.success) {
+    throw new Error(
+      data?.error ||
+      'No se pudo confirmar la eliminación del álbum.'
+    );
+  }
+}
+
 }

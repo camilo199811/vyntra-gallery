@@ -88,6 +88,12 @@ export class AlbumForm implements OnInit {
       Validators.required
     ),
 
+    // NUEVO: nombre personalizado del evento.
+    customEventName: [
+      '',
+      Validators.maxLength(80)
+    ],
+
     protagonists: [''],
 
     eventDate: [''],
@@ -193,6 +199,20 @@ export class AlbumForm implements OnInit {
     this.submitted.set(true);
     this.errorMessage.set('');
 
+    const customEventControl =
+      this.form.controls.customEventName;
+
+    // Obligatorio únicamente para "Otro evento".
+    if (this.form.controls.eventType.value === 'other') {
+      customEventControl.addValidators(Validators.required);
+    } else {
+      customEventControl.removeValidators(Validators.required);
+    }
+
+    customEventControl.updateValueAndValidity({
+      emitEvent: false
+    });
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -200,8 +220,6 @@ export class AlbumForm implements OnInit {
 
     const values = this.form.getRawValue();
 
-    // Comprobar que el cliente esté registrado
-    // y corresponda a un cliente de evento.
     const selectedClient = this.clients().find(
       client => client.id === values.clientId
     );
@@ -224,6 +242,12 @@ export class AlbumForm implements OnInit {
         title: values.title.trim(),
 
         event_type: values.eventType,
+
+        // NUEVO: guardar el nombre personalizado.
+        custom_event_name:
+          values.eventType === 'other'
+            ? values.customEventName.trim()
+            : null,
 
         event_date:
           values.eventDate || null,
@@ -257,16 +281,16 @@ export class AlbumForm implements OnInit {
 
     } catch (error) {
 
-  console.error(
-    'Error creando álbum:',
-    error
-  );
+      console.error(
+        'Error creando álbum:',
+        error
+      );
 
-  this.errorMessage.set(
-    'No fue posible crear el álbum. Verifica la configuración y los permisos de Supabase.'
-  );
+      this.errorMessage.set(
+        'No fue posible crear el álbum. Verifica la configuración y los permisos de Supabase.'
+      );
 
-} finally {
+    } finally {
 
       this.saving.set(false);
 

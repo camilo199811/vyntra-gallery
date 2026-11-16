@@ -139,6 +139,48 @@
 
         </div>
 
+<!-- NOMBRE PERSONALIZADO DEL EVENTO -->
+@if (form.controls.eventType.value === 'other') {
+
+  <div class="md:col-span-2">
+
+    <label
+      for="customEventName"
+      class="mb-2 block text-sm font-medium">
+
+      Nombre personalizado del evento *
+
+    </label>
+
+    <input
+      id="customEventName"
+      type="text"
+      maxlength="80"
+      formControlName="customEventName"
+      placeholder="Ej. Preboda, Prequince, Sesión familiar..."
+      class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-purple-500"
+    />
+
+    <p class="mt-2 text-xs text-gray-500">
+      Este nombre aparecerá en la galería del cliente
+      en lugar de "Otro evento".
+    </p>
+
+    @if (
+      form.controls.customEventName.touched &&
+      form.controls.customEventName.invalid
+    ) {
+
+      <p class="mt-1 text-xs text-red-600">
+        Ingresa un nombre de máximo 80 caracteres.
+      </p>
+
+    }
+
+  </div>
+
+}
+
         <!-- FECHA -->
         <div>
 

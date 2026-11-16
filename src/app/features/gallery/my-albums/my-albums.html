@@ -1,0 +1,139 @@
+
+<section class="my-albums-page">
+  <div class="page-container">
+
+    <header class="page-header">
+      <div class="header-eyebrow">
+        <span class="eyebrow-line"></span>
+        VYNTRA GALLERY
+        <span class="eyebrow-line"></span>
+      </div>
+
+      <h1>Mis álbumes</h1>
+
+      <p class="header-description">
+        Cada momento cuenta una historia.
+        Explora tus recuerdos y revive
+        tus momentos más especiales.
+      </p>
+    </header>
+
+    @if (loading()) {
+
+      <div class="state-container">
+        <div class="loading-spinner"></div>
+        <h2>Preparando tus recuerdos</h2>
+        <p>Estamos cargando tus álbumes.</p>
+      </div>
+
+    } @else if (errorMessage()) {
+
+      <div class="state-container">
+        <div class="state-icon">!</div>
+        <h2>No pudimos cargar tus álbumes</h2>
+        <p>{{ errorMessage() }}</p>
+
+        <button
+          type="button"
+          class="retry-button"
+          (click)="loadAlbums()">
+          Intentar nuevamente
+        </button>
+      </div>
+
+    } @else if (albums().length === 0) {
+
+      <div class="state-container">
+        <div class="empty-icon">✦</div>
+        <h2>Tus recuerdos están en camino</h2>
+        <p>
+          Cuando tus fotografías estén listas,
+          aparecerán aquí.
+        </p>
+      </div>
+
+    } @else {
+
+      <div class="albums-heading">
+        <div class="heading-text">
+          <span class="section-label">
+            TU COLECCIÓN PRIVADA
+          </span>
+          <h2>Momentos para recordar</h2>
+        </div>
+
+        <span class="albums-counter">
+          {{ albums().length }}
+          {{ albums().length === 1 ? 'álbum' : 'álbumes' }}
+        </span>
+      </div>
+
+      <div class="albums-grid">
+
+        @for (album of albums(); track album.id) {
+
+          <button
+            type="button"
+            class="album-card"
+            (click)="openAlbum(album)"
+            [attr.aria-label]="'Abrir álbum ' + album.title">
+
+            <div class="album-cover">
+
+              <img
+                class="cover-image"
+                [src]="getEventImage(album.event_type)"
+                [alt]="'Fotografía representativa de ' + getEventLabel(album.event_type)"
+                loading="lazy">
+
+              <div class="cover-gradient"></div>
+
+              <span class="event-badge">
+  {{ getAlbumEventLabel(album) }}
+</span>
+
+              <div class="cover-bottom">
+                <span class="cover-date">
+                  {{ formatDate(album.event_date) }}
+                </span>
+
+                <span class="cover-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </div>
+            </div>
+
+            <div class="album-information">
+              <div class="album-text">
+                <h3>{{ album.title }}</h3>
+          <p>
+  {{ getAlbumEventLabel(album) }}
+  ·
+  {{ formatDate(album.event_date) }}
+</p>
+              </div>
+
+              <span class="album-action">
+                Explorar recuerdos
+                <span aria-hidden="true">→</span>
+              </span>
+            </div>
+
+          </button>
+
+        }
+
+      </div>
+
+      <footer class="gallery-footer">
+        
+        <p>
+          Los momentos pasan, los recuerdos permanecen.
+        </p>
+        <span>VYNTRA GALLERY</span>
+      </footer>
+
+    }
+
+  </div>
+</section>

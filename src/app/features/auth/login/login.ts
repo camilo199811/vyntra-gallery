@@ -118,14 +118,20 @@ export class Login {
           return;
         }
 
+        // Consultar todos los álbumes del cliente.
         const albums =
           await this.albumsService.getAlbumsByClient(
             access.client_id
           );
 
+        // Mostrar únicamente álbumes publicados.
         const publishedAlbums = albums.filter(
           album => album.status === 'published'
         );
+
+        // ======================================
+        // CLIENTE SIN ÁLBUMES PUBLICADOS
+        // ======================================
 
         if (publishedAlbums.length === 0) {
           this.errorMessage.set(
@@ -134,10 +140,29 @@ export class Login {
           return;
         }
 
-        const firstAlbum = publishedAlbums[0];
+        // ======================================
+        // CLIENTE CON UN SOLO ÁLBUM
+        // ======================================
 
-        await this.router.navigate(
-          ['/gallery', firstAlbum.id, 'album']
+        if (publishedAlbums.length === 1) {
+
+          await this.router.navigate(
+            [
+              '/gallery',
+              publishedAlbums[0].id,
+              'album'
+            ]
+          );
+
+          return;
+        }
+
+        // ======================================
+        // CLIENTE CON VARIOS ÁLBUMES
+        // ======================================
+
+        await this.router.navigateByUrl(
+          '/my-albums'
         );
 
         return;
@@ -147,42 +172,45 @@ export class Login {
         'No se reconoció el tipo de usuario.'
       );
 
-    
+    } catch (error: unknown) {
 
-} catch (error: unknown) {
+      console.error(
+        'VYNTRA - Error completo:',
+        error
+      );
 
-  console.error(
-    'VYNTRA - Error completo:',
-    error
-  );
+      const details =
+        error !== null && typeof error === 'object'
+          ? error as Record<string, unknown>
+          : {};
 
-  const details =
-    error !== null && typeof error === 'object'
-      ? error as Record<string, unknown>
-      : {};
+      const message = [
+        details['message'],
+        details['code'],
+        details['details'],
+        details['hint']
+      ]
+        .filter(
+          value =>
+            value !== null &&
+            value !== undefined
+        )
+        .map(value => String(value))
+        .join(' | ');
 
-  const message = [
-    details['message'],
-    details['code'],
-    details['details'],
-    details['hint']
-  ]
-    .filter(value => value !== null && value !== undefined)
-    .map(value => String(value))
-    .join(' | ');
+      this.errorMessage.set(
+        'Error al acceder: ' +
+        (
+          message ||
+          (
+            error instanceof Error
+              ? error.message
+              : 'Error desconocido. Revisa la consola.'
+          )
+        )
+      );
 
-  this.errorMessage.set(
-    'Error al acceder: ' +
-    (message || (
-      error instanceof Error
-        ? error.message
-        : 'Error desconocido. Revisa la consola.'
-    ))
-  );
-
-}
-
- finally {
+    } finally {
 
       this.loading.set(false);
 
