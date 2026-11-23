@@ -1,0 +1,395 @@
+
+/* ==========================================
+   VYNTRA GALLERY
+   PORTAFOLIO PÚBLICO
+========================================== */
+
+:host {
+  display: block;
+}
+
+/* ==========================================
+   PÁGINA PRINCIPAL
+========================================== */
+
+.portfolio-page {
+  min-height: 100vh;
+  background: #f8f7f4;
+  color: #292725;
+  padding: 0 30px;
+}
+
+/* ==========================================
+   ENCABEZADO
+========================================== */
+
+.portfolio-header {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 90px 0 70px;
+  text-align: center;
+}
+
+.portfolio-brand {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+}
+
+.portfolio-eyebrow {
+  display: block;
+  margin-top: 20px;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: #948981;
+}
+
+.portfolio-header h1 {
+  margin: 32px 0 20px;
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(34px, 5vw, 60px);
+  letter-spacing: -0.045em;
+  line-height: 1.15;
+}
+
+.portfolio-header p {
+  max-width: 530px;
+  margin: 0 auto;
+  color: #807873;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.portfolio-divider {
+  width: 45px;
+  height: 1px;
+  background: #bdb1a9;
+  margin: 38px auto 0;
+}
+
+/* ==========================================
+   MOSAICO EDITORIAL
+========================================== */
+
+
+/* ==========================================
+   VYNTRA - GALERÍA ESTILO PINTEREST
+========================================== */
+
+.portfolio-grid {
+  max-width: 1450px;
+  margin: 0 auto;
+
+  column-count: 3;
+  column-gap: 14px;
+}
+
+.portfolio-item {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 14px;
+
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+
+  break-inside: avoid;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.portfolio-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+
+  transition: transform 0.5s ease;
+}
+
+.portfolio-item:hover img {
+  transform: scale(1.025);
+}
+
+.portfolio-item:focus-visible {
+  outline: 2px solid #a58c7b;
+  outline-offset: 3px;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .portfolio-grid {
+    column-count: 2;
+    column-gap: 10px;
+  }
+
+  .portfolio-item {
+    margin-bottom: 10px;
+  }
+}
+
+/* CELULAR */
+
+@media (max-width: 600px) {
+  .portfolio-grid {
+    column-count: 2;
+    column-gap: 7px;
+  }
+
+  .portfolio-item {
+    margin-bottom: 7px;
+    border-radius: 3px;
+  }
+}
+
+/* ==========================================
+   ESTADOS DE CARGA
+========================================== */
+
+.portfolio-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #8a817a;
+}
+
+/* ==========================================
+   PIE DE PÁGINA
+========================================== */
+
+.portfolio-footer {
+  padding: 85px 0 60px;
+  text-align: center;
+  letter-spacing: 0.2em;
+}
+
+.portfolio-footer span {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+.portfolio-footer p {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #938880;
+}
+
+/* ==========================================
+   VISOR DE FOTOGRAFÍAS
+========================================== */
+
+.photo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(17, 16, 15, 0.96);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 50px 70px;
+}
+
+/* FOTOGRAFÍA AMPLIADA */
+
+.photo-lightbox img {
+  display: block;
+
+  max-width: 100%;
+  max-height: 92vh;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+}
+
+/* BOTONES DEL VISOR */
+
+.lightbox-close,
+.lightbox-arrow {
+  position: absolute;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.lightbox-close:hover,
+.lightbox-arrow:hover {
+  opacity: 0.65;
+}
+
+/* CERRAR */
+
+.lightbox-close {
+  top: 20px;
+  right: 30px;
+  font-size: 38px;
+}
+
+/* FLECHAS */
+
+.lightbox-arrow {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 52px;
+}
+
+.lightbox-arrow--left {
+  left: 20px;
+}
+
+.lightbox-arrow--right {
+  right: 20px;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 900px) {
+
+  .portfolio-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .portfolio-item--landscape,
+  .portfolio-item--featured {
+    grid-column: span 2;
+  }
+
+  .portfolio-header {
+    padding: 75px 0 60px;
+  }
+
+}
+
+/* ==========================================
+   CELULARES
+========================================== */
+
+@media (max-width: 600px) {
+
+  .portfolio-page {
+    padding: 0 14px;
+  }
+
+  .portfolio-header {
+    padding: 65px 10px 50px;
+  }
+
+  .portfolio-header h1 {
+    font-size: clamp(32px, 8vw, 44px);
+  }
+
+  .portfolio-header p {
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  /* MOSAICO MÓVIL */
+
+  .portfolio-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .portfolio-item {
+    border-radius: 3px;
+  }
+
+  .portfolio-item--landscape,
+  .portfolio-item--featured {
+    grid-column: span 2;
+  }
+
+  /* PIE DE PÁGINA */
+
+  .portfolio-footer {
+    padding: 65px 0 45px;
+  }
+
+  /* VISOR */
+
+  .photo-lightbox {
+    padding: 50px 12px;
+  }
+
+  .photo-lightbox img {
+    max-width: 100%;
+    max-height: 85vh;
+  }
+
+  .lightbox-close {
+    top: 15px;
+    right: 18px;
+    font-size: 32px;
+  }
+
+  .lightbox-arrow {
+    font-size: 35px;
+  }
+
+  .lightbox-arrow--left {
+    left: 5px;
+  }
+
+  .lightbox-arrow--right {
+    right: 5px;
+  }
+
+}
+
+/* ==========================================
+   MOVIMIENTO REDUCIDO
+========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .portfolio-item img,
+  .lightbox-close,
+  .lightbox-arrow {
+    transition: none;
+  }
+
+}
+
+/* LOGO VYNTRA */
+
+.portfolio-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+}
+
+.portfolio-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .portfolio-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .portfolio-brand {
+    font-size: 18px;
+    gap: 10px;
+  }
+}

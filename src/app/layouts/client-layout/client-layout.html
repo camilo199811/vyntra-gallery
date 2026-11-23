@@ -18,6 +18,7 @@
       class="sidebar-navigation"
       aria-label="Navegación de la galería">
 
+      <!-- Mi galería -->
       <a
         [routerLink]="galleryUrl() + '/album'"
         routerLinkActive="active"
@@ -35,6 +36,7 @@
         <span>Mi galería</span>
       </a>
 
+      <!-- Mis favoritos -->
       <a
         [routerLink]="galleryUrl() + '/selection'"
         routerLinkActive="active"
@@ -51,8 +53,26 @@
         <span>Mis favoritos</span>
       </a>
 
+      <!-- NUEVO: Portafolio público -->
+      <a
+        routerLink="/portafolio-Vyntra"
+        routerLinkActive="active"
+        (click)="closeMenu()">
+
+        <svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.7"
+          stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true">
+          <path d="M14.5 4h-5L7.5 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.5L14.5 4Z"/>
+          <circle cx="12" cy="13.5" r="3.5"/>
+        </svg>
+
+        <span>Portafolio</span>
+      </a>
+
       @if (!isAdminPreview()) {
 
+        <!-- Detalles del evento -->
         <a
           [routerLink]="galleryUrl()"
           [routerLinkActiveOptions]="{ exact: true }"
@@ -75,6 +95,7 @@
 
     </nav>
 
+    <!-- Decoración botánica -->
     <div
       class="sidebar-botanical"
       aria-hidden="true">

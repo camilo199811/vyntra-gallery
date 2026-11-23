@@ -16,6 +16,17 @@ export const routes: Routes = [
   },
 
   // ======================================
+  // PORTAFOLIO FOTOGRÁFICO PÚBLICO
+  // ======================================
+
+  {
+    path: 'portafolio-Vyntra',
+    loadComponent: () =>
+      import('./features/portfolio/portfolio')
+        .then(m => m.Portfolio)
+  },
+
+  // ======================================
   // INICIO DE SESIÓN
   // ======================================
 
@@ -86,6 +97,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/client-detail/client-detail')
             .then(m => m.ClientDetail)
+      },
+
+      // ======================================
+      // ADMINISTRADOR DEL PORTAFOLIO
+      // ======================================
+
+      {
+        path: 'portfolio',
+        loadComponent: () =>
+          import('./features/admin/portfolio-admin/portfolio-admin')
+            .then(m => m.PortfolioAdmin)
       }
 
     ]
@@ -129,7 +151,7 @@ export const routes: Routes = [
   },
 
   // ======================================
-  // MIS ÁLBUMES - NUEVA PANTALLA
+  // MIS ÁLBUMES
   // ======================================
 
   {

@@ -1,0 +1,183 @@
+
+<section class="portfolio-admin">
+
+  <div class="portfolio-admin__heading">
+    <span class="eyebrow">VYNTRA / ADMINISTRACIÓN</span>
+
+    <h1>Portafolio fotográfico</h1>
+
+    <p>
+      Administra las fotografías que quieres mostrar
+      en el portafolio público de Vyntra.
+    </p>
+  </div>
+
+  <!-- Subida -->
+  <div class="upload-panel">
+
+    <h2>Agregar fotografías</h2>
+
+    <p>
+      Selecciona archivos JPG.
+      Prepararemos automáticamente versiones
+      optimizadas para la web.
+    </p>
+
+    <label class="file-selector">
+      <span>Seleccionar fotografías JPG</span>
+
+      <input
+        type="file"
+        accept="image/jpeg"
+        multiple
+        [disabled]="uploading()"
+        (change)="onFilesSelected($event)"
+      />
+    </label>
+
+    @if (selectedFiles().length > 0) {
+      <div class="selected-count">
+        {{ selectedFiles().length }}
+        fotografías seleccionadas
+      </div>
+
+      <button
+        type="button"
+        class="upload-button"
+        [disabled]="uploading()"
+        (click)="uploadPhotos()"
+      >
+        {{ uploading() ? 'Subiendo...' : 'Publicar fotografías' }}
+      </button>
+    }
+
+    @if (progress()) {
+      <p class="progress-message">{{ progress() }}</p>
+    }
+
+    @if (success()) {
+      <p class="success-message">{{ success() }}</p>
+    }
+
+    @if (error()) {
+      <p class="error-message" role="alert">
+        {{ error() }}
+      </p>
+    }
+  </div>
+
+  <!-- Fotografías existentes -->
+  <div class="photos-section">
+
+    <div class="photos-section__header">
+      <div>
+        <h2>Fotografías del portafolio</h2>
+        <p>
+          Controla cuáles fotografías aparecen
+          en el portafolio público.
+        </p>
+      </div>
+
+      <span class="photos-count">
+        {{ photos().length }} fotografías
+      </span>
+    </div>
+
+    @if (loading()) {
+      <p class="empty-message">Cargando fotografías...</p>
+    } @else if (photos().length === 0) {
+      <p class="empty-message">
+        Todavía no has agregado fotografías.
+      </p>
+    } @else {
+
+      <div class="photos-grid">
+        @for (photo of photos(); track photo.id; let i = $index) {
+
+          <article class="photo-card">
+
+            <div class="photo-card__image">
+              <img
+                [src]="galleryUrl(photo)"
+                [alt]="photo.original_filename"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="photo-card__info">
+
+              <span
+                class="photo-status"
+                [class.photo-status--hidden]="!photo.is_published">
+                {{ photo.is_published ? 'Publicada' : 'Oculta' }}
+              </span>
+
+              <p class="photo-filename">
+                {{ photo.original_filename }}
+              </p>
+
+              <button
+                type="button"
+                class="visibility-button"
+                [disabled]="updatingIds().includes(photo.id)"
+                (click)="togglePublished(photo)">
+                {{
+                  photo.is_published
+                    ? 'Ocultar fotografía'
+                    : 'Publicar fotografía'
+                }}
+              </button>
+
+<button
+  type="button"
+  class="featured-button"
+  [class.featured-button--active]="photo.is_featured"
+  [disabled]="updatingIds().includes(photo.id)"
+  (click)="toggleFeatured(photo)">
+
+  {{ photo.is_featured
+    ? '★ Quitar de destacados'
+    : '☆ Destacar fotografía' }}
+
+</button>
+
+
+<button
+  type="button"
+  class="delete-button"
+  [disabled]="updatingIds().includes(photo.id)"
+  (click)="deletePhoto(photo)">
+
+  Eliminar fotografía
+
+</button>
+
+<div class="photo-order-controls">
+
+  <button
+    type="button"
+    [disabled]="i === 0 || uploading() || updatingIds().length > 0"
+    (click)="movePhoto(photo, -1)">
+    ← Anterior
+  </button>
+
+  <button
+    type="button"
+    [disabled]="i === photos().length - 1 || uploading() || updatingIds().length > 0"
+    (click)="movePhoto(photo, 1)">
+    Siguiente →
+  </button>
+
+</div>
+
+
+            </div>
+
+          </article>
+        }
+      </div>
+    }
+
+  </div>
+
+</section>

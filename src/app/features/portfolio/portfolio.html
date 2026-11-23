@@ -1,0 +1,225 @@
+
+<!-- ==========================================
+     VYNTRA GALLERY
+     PORTAFOLIO PÚBLICO
+========================================== -->
+
+<main class="portfolio-page">
+
+  <!-- ======================================
+       ENCABEZADO
+  ======================================= -->
+
+  <header class="portfolio-header">
+
+    
+<div class="portfolio-brand">
+  <img
+    src="/images/favicon.png"
+    alt="Vyntra"
+    class="portfolio-logo"
+  />
+  <span>VYNTRA</span>
+</div>
+
+
+    <span class="portfolio-eyebrow">
+      FOTOGRAFÍA &amp; RECUERDOS
+    </span>
+
+    <h1>
+      Historias que merecen permanecer.
+    </h1>
+
+    <p>
+      Cada mirada, cada emoción y cada instante
+      cuentan una historia única.
+      Esta es nuestra forma de recordarlas.
+    </p>
+
+    <div class="portfolio-divider"></div>
+
+  </header>
+
+
+  <!-- ======================================
+       ESTADOS DE LA GALERÍA
+  ======================================= -->
+
+  @if (loading()) {
+
+    <p
+      class="portfolio-state"
+      role="status">
+      Preparando nuestra galería...
+    </p>
+
+  } @else if (error()) {
+
+    <p
+      class="portfolio-state"
+      role="alert">
+      {{ error() }}
+    </p>
+
+  } @else if (!photos().length) {
+
+    <p class="portfolio-state">
+      Muy pronto compartiremos nuestras historias.
+    </p>
+
+  } @else {
+
+    <!-- ==================================
+         MOSAICO EDITORIAL DE FOTOGRAFÍAS
+    =================================== -->
+
+    
+<section
+  class="portfolio-grid"
+  aria-label="Portafolio fotográfico">
+
+  @for (photo of photos(); track photo.id; let i = $index) {
+
+    <button
+      type="button"
+      class="portfolio-item"
+      (click)="openPhoto(i)"
+      [attr.aria-label]="'Ampliar fotografía ' + (i + 1)">
+
+      <img
+        [src]="galleryUrl(photo)"
+        [alt]="'Fotografía ' + (i + 1) + ' del portafolio Vyntra'"
+        [attr.loading]="i < 3 ? 'eager' : 'lazy'"
+        decoding="async"
+      />
+
+    </button>
+
+  }
+
+</section>
+
+
+  }
+
+
+  <!-- ======================================
+       PIE DE PÁGINA
+  ======================================= -->
+
+  <footer class="portfolio-footer">
+
+    <span>
+      VYNTRA
+    </span>
+
+    <p>
+      Tu evento, nuestra mirada.
+    </p>
+
+  </footer>
+
+</main>
+
+
+<!-- ==========================================
+     VISOR DE FOTOGRAFÍAS
+========================================== -->
+
+@if (selectedIndex() !== null) {
+
+  <div
+    class="photo-lightbox"
+
+    role="dialog"
+    aria-modal="true"
+    aria-label="Fotografía ampliada"
+
+    tabindex="-1"
+
+    (click)="closePhoto()"
+
+    (keydown.escape)="closePhoto()">
+
+    <!-- BOTÓN CERRAR -->
+
+    <button
+      type="button"
+      class="lightbox-close"
+
+      aria-label="Cerrar fotografía"
+
+      (click)="
+        $event.stopPropagation();
+        closePhoto()
+      ">
+
+      &times;
+
+    </button>
+
+
+    <!-- FOTOGRAFÍA ANTERIOR -->
+
+    <button
+      type="button"
+
+      class="
+        lightbox-arrow
+        lightbox-arrow--left
+      "
+
+      aria-label="Fotografía anterior"
+
+      (click)="
+        $event.stopPropagation();
+        previousPhoto()
+      ">
+
+      &#8249;
+
+    </button>
+
+
+    <!-- FOTOGRAFÍA AMPLIADA -->
+
+    @if (photos()[selectedIndex()!]; as photo) {
+
+      <img
+        [src]="fullUrl(photo)"
+
+        alt="Fotografía ampliada del portafolio Vyntra"
+
+        decoding="async"
+
+        (click)="$event.stopPropagation()"
+      />
+
+    }
+
+
+    <!-- FOTOGRAFÍA SIGUIENTE -->
+
+    <button
+      type="button"
+
+      class="
+        lightbox-arrow
+        lightbox-arrow--right
+      "
+
+      aria-label="Fotografía siguiente"
+
+      (click)="
+        $event.stopPropagation();
+        nextPhoto()
+      ">
+
+      &#8250;
+
+    </button>
+
+  </div>
+
+}
